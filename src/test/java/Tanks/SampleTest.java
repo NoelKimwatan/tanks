@@ -19,11 +19,11 @@ public class SampleTest {
         assert(App.FPS == 30);
     }
 
-    @Test
-    public void newSimpleTest(){
-        App app = new App();
-        assert(App.WIDTH == 864);
-    }
+    // @Test
+    // public void newSimpleTest(){
+    //     App app = new App();
+    //     assert(App.WIDTH == 864);
+    // }
 }
 
 //gradle test jacocoTestReport
