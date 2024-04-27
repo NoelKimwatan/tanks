@@ -3,12 +3,16 @@ package Tanks;
 public class Explosion{
     int xPosition;
     int yPosition;
-    int explosionRadius = 0;
-    int explosionMaxRadiud = 30;
+    int explosionRadius;
+    int explosionMaxRadiud;
     boolean delete = false;
-    public Explosion(int x, int y){
-        xPosition = x;
-        yPosition = y;
+
+    public Explosion(int x, int y, int maxRadius){
+        this.xPosition = x;
+        this.yPosition = y;
+        this.explosionRadius = 0;
+        this.explosionMaxRadiud = maxRadius;
+        System.out.println("New explossion created");
     }
 
 
@@ -25,12 +29,13 @@ public class Explosion{
         app.fill(255,255,0);
         app.ellipse(xPosition, yPosition, (float) (explosionRadius*0.2), (float) (explosionRadius*0.2));
 
+        System.out.println("Explossion radius:"+explosionRadius);
         if(explosionRadius <= explosionMaxRadiud){
-            System.out.println("Expanding explosion");
+            System.out.println("Expanding explosion. Radius: "+explosionRadius);
             explosionRadius += 5;
         }else{
             System.out.println("Explossion is deleted");
-            delete = true;
+            this.delete = true;
         }
     }
 

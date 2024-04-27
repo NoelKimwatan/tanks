@@ -55,15 +55,26 @@ public class Terrain {
 
         //Setup tank positions hPlayerPos
         for(int i: App.hPlayerPos.keySet()){
-            App.tanks.add(new Tank(i, this, App.hPlayerPos.get(i), App.playerColours.get(String.valueOf(App.hPlayerPos.get(i)))));
+            App.tanks.put(App.hPlayerPos.get(i), new Tank(i, this, App.hPlayerPos.get(i), App.playerColours.get(String.valueOf(App.hPlayerPos.get(i)))));
+            //App.tanks.add(new Tank(i, this, App.hPlayerPos.get(i), App.playerColours.get(String.valueOf(App.hPlayerPos.get(i)))));
         }
 
         //Setting up tanks
-        for (Tank tank : App.tanks){
-            tank.setup();
+        for (char c : App.tanks.keySet()){
+            App.tanks.get(c).setup();
+            //tank.setup();
         }
 
-        App.currentPlayer = App.tanks.get(0);
+
+        //Get tank Keys and sort alphabetically
+        App.hPlayerSortedLetters = new Character[App.tanks.keySet().size()];
+        App.hPlayerSortedLetters = App.tanks.keySet().toArray(new Character[0]);
+        Arrays.sort(App.hPlayerSortedLetters);
+        
+
+        App.currentPlayer = App.tanks.get(App.hPlayerSortedLetters[0]);
+        //(char) App.tanks.keySet().toArray()[0];
+        //App.currentPlayer = App.tanks.get(0);
 
     }
 

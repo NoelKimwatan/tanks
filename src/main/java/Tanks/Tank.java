@@ -11,6 +11,8 @@ public class Tank {
     Terrain t;
     int[] colour;
     int speed = 2; //2 * 30 == 60 pixels per second
+    int score = 0;
+    boolean deleted = false;
 
     
 
@@ -34,14 +36,13 @@ public class Tank {
     //Turrents angle
     float turrentAngle = 0;
     int turretDirection = 0;
-    Projectile firedProjectile; 
-    Explosion explosion;
+    Explosion tankExplosion;
 
 
     public Tank(int initialXPosition, Terrain t, char player, Object colour){
         this.currentXPosition = initialXPosition;
         this.fuelLevel = 250;
-        this.health = 50;
+        this.health = 100;
         this.power = 100;
         this.t = t;
         this.currentXPositionVal = initialXPosition * 32;
@@ -69,16 +70,8 @@ public class Tank {
 
         tanksTurrentXEnd = tanksTurrentXStart + tanksTurrentLength * (float) Math.sin(turrentAngle);
         tanksTurrentYEnd = tanksTurrentYStart - tanksTurrentLength * (float) Math.cos(turrentAngle);
-
-
-        if(explosion != null){
-            if(explosion.delete == true){
-                explosion = null;
-            }
-        }
-
-
     }
+
 
     public void forward(){
         //Moving forward
@@ -113,10 +106,8 @@ public class Tank {
     }
 
     public void fire(){
-        if(firedProjectile == null){
-            firedProjectile = new Projectile(tanksTurrentXEnd, tanksTurrentYEnd, power, turrentAngle, t, this);
-        }
-        
+        Projectile firedProjectile = new Projectile(tanksTurrentXEnd, tanksTurrentYEnd, power, turrentAngle, t, this);
+        App.projectileQueue.add(firedProjectile);
     }
 
     public void draw(App app){
@@ -137,15 +128,6 @@ public class Tank {
         app.fill(0,0,0);
         //app.rect(tanksTurrentXStart,tanksTurrentYStart,tanksTurrentWidth, -tanksTurrentLength);
 
-        if(firedProjectile != null){
-            firedProjectile.refresh();
-            if(firedProjectile.delete == true){
-                firedProjectile = null;
-            }else{
-                System.out.println(firedProjectile);
-                firedProjectile.draw(app);
-            }
-        }
         
 
 
@@ -172,9 +154,7 @@ public class Tank {
             
         }
 
-        if(explosion != null){
-            explosion.draw(app);
-        }
+
 
     }
 

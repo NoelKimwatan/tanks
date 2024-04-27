@@ -30,14 +30,14 @@ public class Text {
             windImage1 = null;
         }
 
-        windMagnitude = (int) (Math.random() * (35.0 + 35.0 + 1.0) - 35.0);
+        windMagnitude = (int) ((Math.random() * (35.0 + 35.0 + 1.0)) - 35.0);
 
         
         currentPlayer = App.currentPlayer;
     }
 
     public void generateRandonWind(){
-        windMagnitude = (int) (Math.random() * (35.0 + 35.0 + 1.0) - 35.0);
+        windMagnitude = (int) ((Math.random() * ((35.0 + 35.0 + 1.0)) - 35.0));
     }
 
     public void refreshText(App app){
@@ -50,6 +50,7 @@ public class Text {
         }else if (windMagnitude > 0){
             windImage = windImage2;
         }else{
+            System.out.println("Null wind image selected. Wind speed: "+windMagnitude);
             windImage = null;
         }
 
@@ -58,27 +59,33 @@ public class Text {
 
     public void draw(App app){
         app.fill(0, 0, 0); 
+
+        //Displayes players turn
         app.text("Players "+ App.currentPlayer.player +"'s turn",(1 * 32),(1 * 32));
 
+        //Fuel indicator
         app.image(fuelImage,(10 * 16),(2 * 16) + 4,20,-20);
         app.text(App.currentPlayer.fuelLevel,(10 * 16) + 25,(2 * 16));
 
-        //app.text("Health: "+App.currentPlayer.health,(22 * 16),(2 * 16));
-        app.text("Health: ",(22 * 16),(2 * 16));
-        
-        app.fill(currentPlayer.colour[0], currentPlayer.colour[1], currentPlayer.colour[2]);
-        app.rect((25 * 16), (float)(2.125 * 16.0) , 150, -16);
-        app.fill(0, 0, 0); 
-        app.text("Power: "+App.currentPlayer.power ,(float)(22.0 * 16.0),(float)(3.5 * 16.0));
 
+        //Health indicator
+        app.text("Health: ",(22 * 16),(2 * 16));
+        app.fill(currentPlayer.colour[0], currentPlayer.colour[1], currentPlayer.colour[2]);
+        app.rect((float)(25.5 * 16.0), (float)(2.125 * 16.0) , 150, -16);
+        app.fill(0, 0, 0); 
         app.stroke(255, 0, 0);
         app.strokeWeight(4);
-        healthLineXCoordinates = (float)((25.0 * 16.0) + 150.0 * ((float)App.currentPlayer.health/100.0));
+        healthLineXCoordinates = (float)((25.5 * 16.0) + 150.0 * ((float)App.currentPlayer.health/100.0));
         app.line( healthLineXCoordinates, (float)(2.135 * 16.0), healthLineXCoordinates, (float)(2.125 * 16.0) - 18 );
         app.strokeWeight(2);
-        app.text(" "+currentPlayer.power ,(float)((25.0 * 16.0) + 155.0),(float)(2 * 16.0));
+        app.text(" "+currentPlayer.health ,(float)((25.5 * 16.0) + 155.0),(float)(2 * 16.0));
 
-        app.image(windImage,(48 * 16),(3 * 16) + 4,40,-40);
+        //Power indicator
+        app.text("Power: "+App.currentPlayer.power ,(float)(22.0 * 16.0),(float)(3.5 * 16.0));
+
+
+
+        if (windImage != null) app.image(windImage,(48 * 16),(3 * 16) + 4,40,-40);
         app.text(" "+windMagnitude ,(float)((48 * 16) + 45.0),(float)(2.25 * 16.0));
 
         app.stroke(0, 0, 0);
@@ -90,10 +97,24 @@ public class Text {
         app.strokeWeight(2);
 
         int displacement = 0;
-        for (Tank tank : App.tanks){
-            app.text("Player "+tank.player, (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
+
+        
+        for (char c : App.hPlayerSortedLetters){
+            Tank loopTank = App.tanks.get(c);
+            //System.out.println("Character: "+c);
+            app.fill(loopTank.colour[0], loopTank.colour[1], loopTank.colour[2]);
+            app.text("Player "+ loopTank.player, (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
+            app.text(loopTank.score, (float)((51 * 16) + 4),(float)((5.7 * 16.00) + displacement));
             displacement += 20;
         }
+        app.strokeWeight(2);
+        app.noFill();
+        //app.textSize(12);
+    
+        // for (Tank tank : App.tanks){
+        //     app.text("Player "+tank.player, (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
+        //     displacement += 20;
+        // }
 
     }
     

@@ -44,9 +44,14 @@ public class App extends PApplet {
 
     public ArrayList<Integer> treePositions = new ArrayList<Integer>();
     public ArrayList<Tree> trees = new ArrayList<Tree>();
-    public static ArrayList<Tank> tanks = new ArrayList<Tank>();
+    //public static ArrayList<Tank> tanks = new ArrayList<Tank>();
+    public static HashMap<Character,Tank> tanks = new HashMap<Character,Tank>();
     public static HashMap<Integer,Character> hPlayerPos = new HashMap<Integer,Character>();
     public static HashMap<Integer,Character> AIPlayerPos = new HashMap<Integer,Character>();
+    public static Character[] hPlayerSortedLetters;
+
+    public static ArrayList<Projectile> projectileQueue = new ArrayList<Projectile>();
+    public static ArrayList<Explosion> explossionQueue = new ArrayList<Explosion>();
 
     Text textObject;
     public static int currentPlayerNo = 0;
@@ -76,13 +81,16 @@ public class App extends PApplet {
 	@Override
     public void setup() {
         frameRate(FPS);
+
+        //Set text size to 14
+        this.textSize(14);
 		//See PApplet javadoc:
 		//loadJSONObject(configPath)
 		//loadImage(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
 
         //Loading configPath
         JSONObject configJSON = loadJSONObject(configPath);
-        int levelNo = 2;
+        int levelNo = 0;
         playersTurn = "A";
 
         String backgroundFileName = configJSON.getJSONArray("levels").getJSONObject(levelNo).get("background").toString();
@@ -170,7 +178,11 @@ public class App extends PApplet {
             currentPlayer.fire();
             currentPlayerNo = currentPlayerNo + 1;
             textObject.generateRandonWind();
-            currentPlayer = tanks.get(currentPlayerNo % tanks.size());
+            System.out.println("Tanks size: "+tanks.size());
+            System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
+            System.out.println("Player letter: "+hPlayerSortedLetters[currentPlayerNo % tanks.size()]);
+            currentPlayer = tanks.get(hPlayerSortedLetters[currentPlayerNo % tanks.size()]);
+            System.out.println("Current player selected");
             //Change player
         }
 
@@ -211,6 +223,7 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
+        
 
         this.image(this.background, 0, 0);
 
@@ -220,14 +233,48 @@ public class App extends PApplet {
             t.draw(this);
         }
 
-        for (Tank tank : tanks){
-            tank.refresh();
-            tank.draw(this);
+
+        for (char c : App.tanks.keySet()){
+            Tank tank = tanks.get(c);
+
+            //Do not draw deleted tank
+            if(!tank.deleted){
+                tank.refresh();
+                tank.draw(this);
+            }
+
         }
+
 
 
         textObject.refreshText(this);
         textObject.draw(this);
+
+        //-------------------------------------------
+        //----------Draw projectiles from Queue------
+        //-------------------------------------------
+        for(int i = 0; i < projectileQueue.size(); i++){
+            Projectile projectile = projectileQueue.get(i);
+            projectile.refresh();
+            if(projectile.delete){
+                projectileQueue.remove(i);
+            }else{
+                //System.out.println("Projectile to delete");
+                projectile.draw(this);
+            }   
+        }
+        
+        //-------------------------------------------
+        //----------Draw explossion from Queue------
+        //-------------------------------------------
+        for(int i = 0; i < explossionQueue.size(); i++){
+            Explosion explosonObject = explossionQueue.get(i);
+            if(explosonObject.delete){
+                explossionQueue.remove(i);
+            }else{
+                explosonObject.draw(this);
+            }
+        }
         
 
         //----------------------------------
