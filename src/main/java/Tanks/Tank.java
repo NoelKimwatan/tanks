@@ -50,7 +50,7 @@ public class Tank {
 
         String[] colourVal =  String.valueOf(colour).split(",");
         this.colour = new int[]{Integer.valueOf(colourVal[0]), Integer.valueOf(colourVal[1]), Integer.valueOf(colourVal[2])};
-        System.out.println("Tank created");
+        //System.out.println("Tank created");
 
     }
 

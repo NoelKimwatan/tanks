@@ -1,7 +1,9 @@
 package Tanks;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.HashMap;
+import java.util.ArrayList;
 
 public class Terrain {
 
@@ -23,10 +25,10 @@ public class Terrain {
                 }else if(terrain[i][j] == 'T'){
                     app.treePositions.add(j);
                 }else if(Character.isLetter(terrain[i][j])){
-                    app.hPlayerPos.put(j,terrain[i][j]);
+                    App.hPlayerPos.put(j,terrain[i][j]);
                 }else if(Character.isDigit(terrain[i][j])){
                     //Number of AI player stored as a string
-                    app.AIPlayerPos.put(j,terrain[i][j]);
+                    App.AIPlayerPos.put(j,terrain[i][j]);
                 }
             }
         }
@@ -59,20 +61,28 @@ public class Terrain {
             //App.tanks.add(new Tank(i, this, App.hPlayerPos.get(i), App.playerColours.get(String.valueOf(App.hPlayerPos.get(i)))));
         }
 
+        App.hPlayerSortedLetters = new ArrayList<Character>();
         //Setting up tanks
         for (char c : App.tanks.keySet()){
-            App.tanks.get(c).setup();
+            System.out.println("Tank letter: "+c);
+            System.out.println("Get tank"+App.tanks.get(c));
+            //App.tanks.get(c).setup();
+            App.hPlayerSortedLetters.add(c);
             //tank.setup();
         }
 
+        App.hPlayerSortedLetters.sort(Comparator.naturalOrder());
+        App.currentPlayer = App.tanks.get(App.hPlayerSortedLetters.get(0));
+        System.out.println("Current player: "+App.currentPlayer);
 
         //Get tank Keys and sort alphabetically
-        App.hPlayerSortedLetters = new Character[App.tanks.keySet().size()];
-        App.hPlayerSortedLetters = App.tanks.keySet().toArray(new Character[0]);
-        Arrays.sort(App.hPlayerSortedLetters);
+        
+        // App.hPlayerSortedLetters = new Character[App.tanks.keySet().size()];
+        // App.hPlayerSortedLetters = App.tanks.keySet().toArray(new Character[0]);
+        // Arrays.sort(App.hPlayerSortedLetters);
         
 
-        App.currentPlayer = App.tanks.get(App.hPlayerSortedLetters[0]);
+        
         //(char) App.tanks.keySet().toArray()[0];
         //App.currentPlayer = App.tanks.get(0);
 

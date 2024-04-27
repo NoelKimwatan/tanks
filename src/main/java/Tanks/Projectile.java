@@ -36,6 +36,8 @@ public class Projectile {
         for(char tankChar : App.tanks.keySet()){
             Tank tank = App.tanks.get(tankChar);
 
+            if (tank.deleted) continue;
+
             //Check if tank is within blast radius
             if(Math.abs(tank.currentXPositionVal - xPosition) <= 30 ){
                 int explosionDamage = (int) (1 - (Math.abs(tank.currentXPositionVal - xPosition))/30)*60;
@@ -45,6 +47,10 @@ public class Projectile {
                     System.out.println("Tank explodes");
                     tank.health = 0;
                     tank.deleted = true;
+                    // System.out.println("Tank: "+tank.player);
+                    // System.out.println("hPlayerSortedLetters array:"+App.hPlayerSortedLetters.toString());
+                    // System.out.println("Remove player: "+App.hPlayerSortedLetters.remove(App.hPlayerSortedLetters.indexOf(tank.player)));
+                    // //App.hPlayerSortedLetters.remove(tank.player);
                     Explosion tankExplosion = new Explosion(tank.currentXPositionVal,terrain.terrainMovingAverageHeight[(int)tank.currentXPositionVal], 15);
                     App.explossionQueue.add(tankExplosion);
 

@@ -30,6 +30,7 @@ public class Explosion{
         app.ellipse(xPosition, yPosition, (float) (explosionRadius*0.2), (float) (explosionRadius*0.2));
 
         System.out.println("Explossion radius:"+explosionRadius);
+
         if(explosionRadius <= explosionMaxRadiud){
             System.out.println("Expanding explosion. Radius: "+explosionRadius);
             explosionRadius += 5;

@@ -48,7 +48,7 @@ public class App extends PApplet {
     public static HashMap<Character,Tank> tanks = new HashMap<Character,Tank>();
     public static HashMap<Integer,Character> hPlayerPos = new HashMap<Integer,Character>();
     public static HashMap<Integer,Character> AIPlayerPos = new HashMap<Integer,Character>();
-    public static Character[] hPlayerSortedLetters;
+    public static ArrayList<Character> hPlayerSortedLetters;
 
     public static ArrayList<Projectile> projectileQueue = new ArrayList<Projectile>();
     public static ArrayList<Explosion> explossionQueue = new ArrayList<Explosion>();
@@ -178,10 +178,14 @@ public class App extends PApplet {
             currentPlayer.fire();
             currentPlayerNo = currentPlayerNo + 1;
             textObject.generateRandonWind();
+
+            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+                currentPlayerNo = currentPlayerNo + 1;
+            }
             System.out.println("Tanks size: "+tanks.size());
             System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
-            System.out.println("Player letter: "+hPlayerSortedLetters[currentPlayerNo % tanks.size()]);
-            currentPlayer = tanks.get(hPlayerSortedLetters[currentPlayerNo % tanks.size()]);
+            System.out.println("Player letter: "+hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
             System.out.println("Current player selected");
             //Change player
         }
@@ -276,6 +280,17 @@ public class App extends PApplet {
             }
         }
         
+        //-------------------------------------------
+        //----------Ensure current player is alive------
+        //-------------------------------------------
+        if(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+                System.out.println("Current player is deleted");
+                currentPlayerNo = currentPlayerNo + 1;
+            }
+            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+        }
+
 
         //----------------------------------
         //display HUD:
