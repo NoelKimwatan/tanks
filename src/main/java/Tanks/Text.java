@@ -15,6 +15,7 @@ public class Text {
     public int playersFuelAmount; 
     float healthLineXCoordinates;
     public int windMagnitude;
+    private int displayArrowCounter = 60;
 
     public Text(App app){
         try{
@@ -38,6 +39,7 @@ public class Text {
 
     public void generateRandonWind(){
         windMagnitude = (int) ((Math.random() * ((35.0 + 35.0 + 1.0)) - 35.0));
+        displayArrowCounter = 60; //2 secons so 60 frames
     }
 
     public void refreshText(App app){
@@ -50,7 +52,7 @@ public class Text {
         }else if (windMagnitude > 0){
             windImage = windImage2;
         }else{
-            System.out.println("Null wind image selected. Wind speed: "+windMagnitude);
+            //System.out.println("Null wind image selected. Wind speed: "+windMagnitude);
             windImage = null;
         }
 
@@ -87,6 +89,17 @@ public class Text {
 
         if (windImage != null) app.image(windImage,(48 * 16),(3 * 16) + 4,40,-40);
         app.text(" "+windMagnitude ,(float)((48 * 16) + 45.0),(float)(2.25 * 16.0));
+
+
+        //Draw current player
+        if(displayArrowCounter > 0){
+            System.out.println("Display arrow");
+            app.stroke(0, 0, 0);
+            app.line((this.currentPlayer.currentXPositionVal),(this.currentPlayer.currentYPositionVal -80), (this.currentPlayer.currentXPositionVal), (this.currentPlayer.currentYPositionVal -180));
+            app.line((this.currentPlayer.currentXPositionVal),(this.currentPlayer.currentYPositionVal -80), (this.currentPlayer.currentXPositionVal + 20), (this.currentPlayer.currentYPositionVal -100));
+            app.line((this.currentPlayer.currentXPositionVal),(this.currentPlayer.currentYPositionVal -80), (this.currentPlayer.currentXPositionVal - 20), (this.currentPlayer.currentYPositionVal -100));
+            displayArrowCounter -= 1;
+        }
 
 
 

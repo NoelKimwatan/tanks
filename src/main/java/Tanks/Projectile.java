@@ -33,15 +33,26 @@ public class Projectile {
         //System.out.println("Projectile velocity: " + projectileVelocity + " Projectile x velocity: "+ projectileXVelocity + " Projectile Y velocity: "+projectileYVelocity);
     }
 
-    public void checkTankHit(int xPosition){
+    public void checkTankHit(){
         for(char tankChar : App.tanks.keySet()){
             Tank tank = App.tanks.get(tankChar);
 
             if (tank.deleted) continue;
 
+            // System.out.println("Tanks position x: "+tank.currentXPositionVal+" y: "+tank.currentYPositionVal);
+            // System.out.println("Projectile position: x: "+xPosition+" y: "+yPosition);
+            // System.out.println("Terraine: y: "+terrain.terrainMovingAverageHeight[(int)xPosition]);
+
+            double xdistance = tank.currentXPositionVal - xPosition;
+            //For exact damage calc use level value
+            //double ydistance = tank.currentYPositionVal - yPosition;
+            double ydistance = tank.currentYPositionVal - terrain.terrainMovingAverageHeight[(int)xPosition];
+            double distance = Math.sqrt( ((xdistance * xdistance) + (ydistance * ydistance)) );
+            //System.out.println("Distance: "+distance+ " Int distance: "+(int)distance);
+
             //Check if tank is within blast radius
-            if(Math.abs(tank.currentXPositionVal - xPosition) <= 30 ){
-                int explosionDamage = (int) (1 - (Math.abs(tank.currentXPositionVal - xPosition))/30)*60;
+            if(distance <= 30 ){
+                int explosionDamage = (int) ((1 - distance/30)*60);
                 System.out.println("Explossion damage: "+explosionDamage);
                 if( explosionDamage >= tank.health){
                     //Delete a player
@@ -56,7 +67,15 @@ public class Projectile {
                     App.explossionQueue.add(tankExplosion);
 
                 }else{
-                    tank.health = tank.health - (int) (1 - (Math.abs(tank.currentXPositionVal - xPosition))/30)*60;
+                    //tank.health = tank.health - (int) (1 - (Math.abs(tank.currentXPositionVal - xPosition))/30)*60;
+                    tank.health = tank.health - (int) explosionDamage;
+                }
+
+                if(tank != this.sourceTank){
+                    System.out.println("Damaged another player");
+                    this.sourceTank.score += (int) explosionDamage;
+                }else{
+                    System.out.println("Damaged self");
                 }
             }
         }
@@ -73,7 +92,7 @@ public class Projectile {
             //System.out.println("Projectile has hit the ground");
             //System.out.println("Projectile has hit the ground at X: "+xPosition + " Y:"+ yPosition);
 
-            checkTankHit((int)xPosition);
+            checkTankHit();
 
             //Looping through the blast diameter
             int start = 0;

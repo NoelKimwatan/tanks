@@ -46,12 +46,13 @@ public class Tank {
 
     public Tank(int initialXPosition, Terrain t, char player, Object colour){
         this.currentXPosition = initialXPosition;
-        this.fuelLevel = 250;
+        this.fuelLevel = 250000;
         this.health = 100;
-        this.power = 100;
+        this.power = 50;
         this.t = t;
-        this.currentXPositionVal = initialXPosition * 32;
-        this.currentYPositionVal = t.terrainMovingAverageHeight[(initialXPosition * 32) + 16];
+        //this.currentXPositionVal = initialXPosition * 32;
+        this.currentXPositionVal = (initialXPosition * 32) + 16;
+        this.currentYPositionVal = t.terrainMovingAverageHeight[currentXPositionVal];
         this.player = player;
 
         String[] colourVal =  String.valueOf(colour).split(",");
@@ -69,13 +70,18 @@ public class Tank {
     }
 
     public void refresh(){
-        tankDrawYAxis = (t.terrainMovingAverageHeight[currentXPositionVal +  16]);
+        //tankDrawYAxis = (t.terrainMovingAverageHeight[currentXPositionVal +  16]);
 
-        tanksTurrentXStart = (currentXPositionVal + 16);
-        tanksTurrentYStart = tankDrawYAxis - 16;
+        tanksTurrentXStart = (currentXPositionVal);
+        tanksTurrentYStart = currentYPositionVal - 16;
 
         tanksTurrentXEnd = tanksTurrentXStart + tanksTurrentLength * (float) Math.sin(turrentAngle);
         tanksTurrentYEnd = tanksTurrentYStart - tanksTurrentLength * (float) Math.cos(turrentAngle);
+
+        if(App.currentPlayer != this){
+            this.stop();
+            this.turrentMovement(0);
+        }
     }
 
 
@@ -114,9 +120,6 @@ public class Tank {
         this.turretDirection = direction;
     }
 
-    public void turrentMovementStop(){
-       this.turretDirection = 0;
-    }
 
     public void stop(){
         //Moving forward
@@ -138,8 +141,8 @@ public class Tank {
         //Drawing tank
         app.stroke(0,0,0);
         app.fill(colour[0],colour[1],colour[2]);
-        app.rect(currentXPositionVal,tankDrawYAxis, tanksBottonWidth, -8, tanksSideCurves, tanksSideCurves, tanksSideCurves, tanksSideCurves);
-        app.rect((currentXPositionVal + (tanksBottonWidth - tanksTopWidth)/2),(tankDrawYAxis - 8), tanksTopWidth, -8, tanksSideCurves, tanksSideCurves, 0, 0);
+        app.rect((currentXPositionVal - tanksBottonWidth/2),currentYPositionVal, tanksBottonWidth, -8, tanksSideCurves, tanksSideCurves, tanksSideCurves, tanksSideCurves);
+        app.rect(((currentXPositionVal - tanksBottonWidth/2) + (tanksBottonWidth - tanksTopWidth)/2),(currentYPositionVal - 8), tanksTopWidth, -8, tanksSideCurves, tanksSideCurves, 0, 0);
 
         //Drawing turrent
         app.stroke(0,0,0);
@@ -161,9 +164,11 @@ public class Tank {
 
         if(direction == 1){
             currentXPositionVal = currentXPositionVal + speed;
+            currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
             fuelLevel = fuelLevel - speed;
         }else if(direction == -1){
             currentXPositionVal = currentXPositionVal - speed;
+            currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
             fuelLevel = fuelLevel - speed;
         }
 

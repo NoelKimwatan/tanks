@@ -64,8 +64,8 @@ public class Terrain {
         App.hPlayerSortedLetters = new ArrayList<Character>();
         //Setting up tanks
         for (char c : App.tanks.keySet()){
-            System.out.println("Tank letter: "+c);
-            System.out.println("Get tank"+App.tanks.get(c));
+            //System.out.println("Tank letter: "+c);
+            //System.out.println("Get tank"+App.tanks.get(c));
             //App.tanks.get(c).setup();
             App.hPlayerSortedLetters.add(c);
             //tank.setup();
@@ -73,7 +73,7 @@ public class Terrain {
 
         App.hPlayerSortedLetters.sort(Comparator.naturalOrder());
         App.currentPlayer = App.tanks.get(App.hPlayerSortedLetters.get(0));
-        System.out.println("Current player: "+App.currentPlayer);
+        //System.out.println("Current player: "+App.currentPlayer);
 
         //Get tank Keys and sort alphabetically
         

@@ -160,25 +160,25 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(KeyEvent event){
-        System.out.println("Keyboard pressed: "+ event.getKeyCode());
+        //System.out.println("Keyboard pressed: "+ event.getKeyCode());
 
         //Check for key press only if game is not Over
         if(!gameOver){
 
             if(event.getKeyCode() == 39){
-                System.out.println("Forward pressed");
+                //System.out.println("Forward pressed");
                 currentPlayer.forward();
             }else if(event.getKeyCode() == 37){
-                System.out.println("Back pressed");
+                //System.out.println("Back pressed");
                 currentPlayer.backward();
             }else if(event.getKeyCode() == 38){
-                System.out.println("Up button pressed");
+                //System.out.println("Up button pressed");
                 currentPlayer.turrentMovement(-1);
             }else if(event.getKeyCode() == 40){
-                System.out.println("Down button pressed");
+                //System.out.println("Down button pressed");
                 currentPlayer.turrentMovement(1);
             }else if(event.getKeyCode() == 32){
-                System.out.println("Spacebar pressed");
+                //System.out.println("Spacebar pressed");
                 currentPlayer.fire();
                 currentPlayerNo = currentPlayerNo + 1;
                 textObject.generateRandonWind();
@@ -186,11 +186,11 @@ public class App extends PApplet {
                 while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
                     currentPlayerNo = currentPlayerNo + 1;
                 }
-                System.out.println("Tanks size: "+tanks.size());
-                System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
-                System.out.println("Player letter: "+hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+                //System.out.println("Tanks size: "+tanks.size());
+                //System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
+                //System.out.println("Player letter: "+hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
                 currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-                System.out.println("Current player selected");
+                //System.out.println("Current player selected");
                 //Change player
             }else if(event.getKeyCode() == 87){
                 //W has been pressed
@@ -219,7 +219,7 @@ public class App extends PApplet {
         if(event.getKeyCode() == 39 || event.getKeyCode() == 37){
             currentPlayer.stop();
         }else if(event.getKeyCode() == 38 || event.getKeyCode() == 40){
-            currentPlayer.turrentMovementStop();
+            currentPlayer.turrentMovement(0);
         }else if(event.getKeyCode() == 83 || event.getKeyCode() == 87){
             System.out.println("Button 83 or 87 released");
             currentPlayer.turrentPower(0);
