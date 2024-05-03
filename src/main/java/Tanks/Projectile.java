@@ -54,22 +54,8 @@ public class Projectile {
             if(distance <= 30 ){
                 int explosionDamage = (int) ((1 - distance/30)*60);
                 System.out.println("Explossion damage: "+explosionDamage);
-                if( explosionDamage >= tank.health){
-                    //Delete a player
-                    System.out.println("Tank explodes");
-                    tank.health = 0;
-                    tank.deleted = true;
-                    // System.out.println("Tank: "+tank.player);
-                    // System.out.println("hPlayerSortedLetters array:"+App.hPlayerSortedLetters.toString());
-                    // System.out.println("Remove player: "+App.hPlayerSortedLetters.remove(App.hPlayerSortedLetters.indexOf(tank.player)));
-                    // //App.hPlayerSortedLetters.remove(tank.player);
-                    Explosion tankExplosion = new Explosion(tank.currentXPositionVal,terrain.terrainMovingAverageHeight[(int)tank.currentXPositionVal], 15);
-                    App.explossionQueue.add(tankExplosion);
+                tank.tankDamage(explosionDamage);
 
-                }else{
-                    //tank.health = tank.health - (int) (1 - (Math.abs(tank.currentXPositionVal - xPosition))/30)*60;
-                    tank.health = tank.health - (int) explosionDamage;
-                }
 
                 if(tank != this.sourceTank){
                     System.out.println("Damaged another player");
@@ -88,9 +74,7 @@ public class Projectile {
         }
         //Check if it has hit the ground
         else if(terrain.terrainMovingAverageHeight[(int)xPosition] <= (int)yPosition){
-            //Remove terraine
-            //System.out.println("Projectile has hit the ground");
-            //System.out.println("Projectile has hit the ground at X: "+xPosition + " Y:"+ yPosition);
+
 
             checkTankHit();
 

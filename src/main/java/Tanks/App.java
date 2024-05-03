@@ -14,6 +14,7 @@ import java.awt.image.BufferedImage;
 
 import java.io.*;
 import java.util.*;
+import java.time.Clock;
 
 public class App extends PApplet {
 
@@ -36,21 +37,22 @@ public class App extends PApplet {
     public static Random random = new Random();
 
     //Created
-    private PImage background;
+    public PImage background;
     public int[] foreGroundColor;
     public PImage tree;
     private char[][] terrain = new char[BOARD_HEIGHT][28];
     Terrain gameTerraine;
     boolean gameOver = false;
 
-    public ArrayList<Integer> treePositions = new ArrayList<Integer>();
-    public ArrayList<Tree> trees = new ArrayList<Tree>();
+    //To remove
+    public Clock clock = Clock.systemDefaultZone();
+
+    
+    
     //public static ArrayList<Tank> tanks = new ArrayList<Tank>();
     public static HashMap<Character,Tank> tanks = new HashMap<Character,Tank>();
-    public static HashMap<Integer,Character> hPlayerPos = new HashMap<Integer,Character>();
-    public static HashMap<Integer,Character> AIPlayerPos = new HashMap<Integer,Character>();
     public static ArrayList<Character> hPlayerSortedLetters;
-
+    public static ArrayList<Character> alivePlayers;
     public static ArrayList<Projectile> projectileQueue = new ArrayList<Projectile>();
     public static ArrayList<Explosion> explossionQueue = new ArrayList<Explosion>();
 
@@ -60,7 +62,7 @@ public class App extends PApplet {
     
 
     public static JSONObject playerColours;
-    public static String playersTurn;
+
 	
 	// Feel free to add any additional methods or attributes you want. Please put classes in different files.
 
@@ -92,7 +94,6 @@ public class App extends PApplet {
         //Loading configPath
         JSONObject configJSON = loadJSONObject(configPath);
         int levelNo = 0;
-        playersTurn = "A";
 
         String backgroundFileName = configJSON.getJSONArray("levels").getJSONObject(levelNo).get("background").toString();
         String terrainFileName = configJSON.getJSONArray("levels").getJSONObject(levelNo).get("layout").toString();
@@ -140,9 +141,13 @@ public class App extends PApplet {
 
         }
 
-        //Setup terraine
+        //Set image backgroud once
+        //this.image(this.background, 0, 0);
+
+        //Setup terrain
         gameTerraine = new Terrain(BOARD_HEIGHT,28,terrain,this);
         gameTerraine.setup();
+        gameTerraine.draw(this);
 
 
         //Setup trees
@@ -160,17 +165,17 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(KeyEvent event){
-        //System.out.println("Keyboard pressed: "+ event.getKeyCode());
+        System.out.println("Keyboard pressed: "+ event.getKeyCode());
 
         //Check for key press only if game is not Over
         if(!gameOver){
 
             if(event.getKeyCode() == 39){
-                //System.out.println("Forward pressed");
-                currentPlayer.forward();
+                System.out.println("Forward pressed");
+                currentPlayer.move(1);
             }else if(event.getKeyCode() == 37){
                 //System.out.println("Back pressed");
-                currentPlayer.backward();
+                currentPlayer.move(-1);
             }else if(event.getKeyCode() == 38){
                 //System.out.println("Up button pressed");
                 currentPlayer.turrentMovement(-1);
@@ -217,7 +222,7 @@ public class App extends PApplet {
 	@Override
     public void keyReleased(KeyEvent event){
         if(event.getKeyCode() == 39 || event.getKeyCode() == 37){
-            currentPlayer.stop();
+            currentPlayer.move(0);
         }else if(event.getKeyCode() == 38 || event.getKeyCode() == 40){
             currentPlayer.turrentMovement(0);
         }else if(event.getKeyCode() == 83 || event.getKeyCode() == 87){
@@ -238,97 +243,88 @@ public class App extends PApplet {
 
     }
 
+    //Redraw terrain after deformation
+    public void drawTerrain(){
+        //Draw terrain after deformation
+        this.gameTerraine.draw(this);
+    }
+
     /**
      * Draw all elements in the game by current frame.
      */
 	@Override
     public void draw() {
+        System.out.println(clock.millis());
 
         //-------------------------------------------
         //--------Check no of players remaining------
         //-------------------------------------------
 
-        int remainingPlayers = 0;
-        for(Tank tank : tanks.values()){
-            if(!tank.deleted){
-                remainingPlayers += 1;
-            }
-        }
-        if (remainingPlayers == 1){
-            gameOver = true;
-        }
+
+
 
         //-------------------------------------------
         //----------Stop game when game is over------
         //-------------------------------------------
 
-        //-------------------------------------------
-        //----------Ensure current player is alive------
-        //-------------------------------------------
-        if(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
-            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo % hPlayerSortedLetters.size())).deleted == true && gameOver == false){
-                System.out.println("Current player is deleted");
-                currentPlayerNo = currentPlayerNo + 1;
-            }
-            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-        }
 
-        //Set image backgroud
-        this.image(this.background, 0, 0);
 
-        //Draw terrain
+
         this.gameTerraine.draw(this);
 
-        //Draw trees
-        for (Tree t : trees){
-            t.draw(this);
-        }
+
+
 
         //Draw tanks
-        for (char c : App.tanks.keySet()){
+        for (char c : alivePlayers){
             Tank tank = tanks.get(c);
 
             //Do not draw deleted tank
             if(!tank.deleted){
-                tank.refresh();
                 tank.draw(this);
             }
 
         }
 
 
-
         //-------------------------------------------
         //----------Draw projectiles from Queue------
         //-------------------------------------------
 
-        for(int i = 0; i < projectileQueue.size(); i++){
-            Projectile projectile = projectileQueue.get(i);
-
-            //Only refresh if game is not over
-            if (!gameOver)projectile.refresh();
-
-            if(projectile.delete){
-                projectileQueue.remove(i);
-            }else{
-                //System.out.println("Projectile to delete");
-                projectile.draw(this);
+        if(projectileQueue.size() > 0){
+            for(int i = 0; i < projectileQueue.size(); i++){
+                Projectile projectile = projectileQueue.get(i);
+    
+                //Only refresh if game is not over
+                if (!gameOver)projectile.refresh();
+    
+                if(projectile.delete){
+                    projectileQueue.remove(i);
+                }else{
+                    //System.out.println("Projectile to delete");
+                    projectile.draw(this);
+                }   
             }   
-        }              
+        }
+           
 
 
 
-        //-------------------------------------------
-        //----------Draw explossion from Queue------
-        //-------------------------------------------
-        for(int i = 0; i < explossionQueue.size(); i++){
-            Explosion explosonObject = explossionQueue.get(i);
-            if(explosonObject.delete){
-                explossionQueue.remove(i);
-            }else{
-                explosonObject.draw(this);
+        // -------------------------------------------
+        // ----------Draw explossion from Queue------
+        // -------------------------------------------
+        if(explossionQueue.size() > 0){
+            for(int i = 0; i < explossionQueue.size(); i++){
+                Explosion explosonObject = explossionQueue.get(i);
+                if(explosonObject.delete){
+                    explossionQueue.remove(i);
+                }else{
+                    explosonObject.tick();
+                    explosonObject.draw(this);
+                }
             }
         }
+
 
         //Refresh text
         textObject.refreshText(this);

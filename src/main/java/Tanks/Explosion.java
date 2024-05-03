@@ -15,6 +15,18 @@ public class Explosion{
         //System.out.println("New explossion created");
     }
 
+    public void tick(){
+
+        //System.out.println("Explossion radius:"+explosionRadius);
+        if(explosionRadius <= explosionMaxRadiud){
+            //System.out.println("Expanding explosion. Radius: "+explosionRadius);
+            explosionRadius += 5;
+        }else{
+            //System.out.println("Explossion is deleted");
+            this.delete = true;
+        }
+    }
+
 
     public void draw(App app){
         app.stroke(255,0,0);
@@ -29,16 +41,5 @@ public class Explosion{
         app.fill(255,255,0);
         app.ellipse(xPosition, yPosition, (float) (explosionRadius*0.2), (float) (explosionRadius*0.2));
 
-        //System.out.println("Explossion radius:"+explosionRadius);
-
-        if(explosionRadius <= explosionMaxRadiud){
-            //System.out.println("Expanding explosion. Radius: "+explosionRadius);
-            explosionRadius += 5;
-        }else{
-            //System.out.println("Explossion is deleted");
-            this.delete = true;
-        }
     }
-
-
 }

@@ -93,7 +93,7 @@ public class Text {
 
         //Draw current player
         if(displayArrowCounter > 0){
-            System.out.println("Display arrow");
+            //System.out.println("Display arrow");
             app.stroke(0, 0, 0);
             app.line((this.currentPlayer.currentXPositionVal),(this.currentPlayer.currentYPositionVal -80), (this.currentPlayer.currentXPositionVal), (this.currentPlayer.currentYPositionVal -180));
             app.line((this.currentPlayer.currentXPositionVal),(this.currentPlayer.currentYPositionVal -80), (this.currentPlayer.currentXPositionVal + 20), (this.currentPlayer.currentYPositionVal -100));

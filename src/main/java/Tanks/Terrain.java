@@ -4,13 +4,20 @@ import java.util.Comparator;
 import java.util.LinkedList;
 import java.util.HashMap;
 import java.util.ArrayList;
+import processing.core.PGraphics;
+//import processing.core.createGraphics;
 
 public class Terrain {
 
     public int[] terrainHeights;
     public int[] terrainMovingAverageHeight;
     private int movingAverageNo = 32;
-    
+    private ArrayList<Integer> treePositions = new ArrayList<Integer>();
+    private static HashMap<Integer,Character> hPlayerPos = new HashMap<Integer,Character>();
+    private static HashMap<Integer,Character> AIPlayerPos = new HashMap<Integer,Character>();
+    public ArrayList<Tree> trees = new ArrayList<Tree>();
+    PGraphics terrainGraphics;
+
     public App app;
 
     public Terrain(int height, int width, char[][] terrain,App app){
@@ -23,12 +30,12 @@ public class Terrain {
                 if(terrain[i][j] == 'X'){
                     terrainHeights[j] = i * 32;
                 }else if(terrain[i][j] == 'T'){
-                    app.treePositions.add(j);
+                    treePositions.add(j);
                 }else if(Character.isLetter(terrain[i][j])){
-                    App.hPlayerPos.put(j,terrain[i][j]);
+                    hPlayerPos.put(j,terrain[i][j]);
                 }else if(Character.isDigit(terrain[i][j])){
                     //Number of AI player stored as a string
-                    App.AIPlayerPos.put(j,terrain[i][j]);
+                    AIPlayerPos.put(j,terrain[i][j]);
                 }
             }
         }
@@ -46,32 +53,31 @@ public class Terrain {
     } 
 
     public void setup(){
+        
         terrainMovingAverageHeight = this.movingAverage(terrainMovingAverageHeight);
         terrainMovingAverageHeight = this.movingAverage(terrainMovingAverageHeight);
 
 
         //Setup tree positions
-        for(Integer i: app.treePositions){
-            app.trees.add(new Tree(i, this, app.tree)) ;
+        for(Integer i: treePositions){
+            this.trees.add(new Tree(i, this, app.tree)) ;
         }
 
         //Setup tank positions hPlayerPos
-        for(int i: App.hPlayerPos.keySet()){
-            App.tanks.put(App.hPlayerPos.get(i), new Tank(i, this, App.hPlayerPos.get(i), App.playerColours.get(String.valueOf(App.hPlayerPos.get(i)))));
-            //App.tanks.add(new Tank(i, this, App.hPlayerPos.get(i), App.playerColours.get(String.valueOf(App.hPlayerPos.get(i)))));
+        App.hPlayerSortedLetters = new ArrayList<Character>();
+        App.alivePlayers = new ArrayList<Character>();
+        for(int i: hPlayerPos.keySet()){
+            Tank tank = new Tank(i, this, hPlayerPos.get(i), App.playerColours.get(String.valueOf(hPlayerPos.get(i))));
+            App.tanks.put(hPlayerPos.get(i), tank);
+            App.alivePlayers.add(tank.player);
+            App.hPlayerSortedLetters.add(tank.player);
+
         }
 
-        App.hPlayerSortedLetters = new ArrayList<Character>();
-        //Setting up tanks
-        for (char c : App.tanks.keySet()){
-            //System.out.println("Tank letter: "+c);
-            //System.out.println("Get tank"+App.tanks.get(c));
-            //App.tanks.get(c).setup();
-            App.hPlayerSortedLetters.add(c);
-            //tank.setup();
-        }
+
 
         App.hPlayerSortedLetters.sort(Comparator.naturalOrder());
+        App.alivePlayers.sort(Comparator.naturalOrder());
         App.currentPlayer = App.tanks.get(App.hPlayerSortedLetters.get(0));
         //System.out.println("Current player: "+App.currentPlayer);
 
@@ -86,6 +92,30 @@ public class Terrain {
         //(char) App.tanks.keySet().toArray()[0];
         //App.currentPlayer = App.tanks.get(0);
 
+        drawTerraingraphics();
+
+    }
+
+    public void drawTerraingraphics(){
+        //Draw graphics
+        terrainGraphics = app.createGraphics(App.WIDTH,App.HEIGHT);
+        terrainGraphics.beginDraw();
+
+        terrainGraphics.image(app.background, 0, 0);
+        terrainGraphics.stroke(app.foreGroundColor[0], app.foreGroundColor[1], app.foreGroundColor[2]);
+
+
+        for(int i = 0; i < terrainMovingAverageHeight.length; i++){
+            terrainGraphics.line(i,terrainMovingAverageHeight[i],i,App.HEIGHT);
+            //app.point(i, terrainMovingAverageHeight[i]);
+        }
+        //System.out.println(app.clock.millis());
+
+        //Draw trees
+        for (Tree tree : trees){
+            tree.draw(terrainGraphics);
+        }
+        terrainGraphics.endDraw();
     }
 
 
@@ -103,12 +133,23 @@ public class Terrain {
 
     //Draw terrain
     public void draw(App app){
-        app.stroke(app.foreGroundColor[0], app.foreGroundColor[1], app.foreGroundColor[2]);
+        // app.stroke(app.foreGroundColor[0], app.foreGroundColor[1], app.foreGroundColor[2]);
 
 
-        for(int i = 0; i < terrainMovingAverageHeight.length; i++){
-            app.line(i,terrainMovingAverageHeight[i],i,App.HEIGHT);
-        }
+        // for(int i = 0; i < terrainMovingAverageHeight.length; i++){
+        //     //app.line(i,terrainMovingAverageHeight[i],i,terrainMovingAverageHeight[i]+2);
+        //     app.point(i, terrainMovingAverageHeight[i]);
+        // }
+        // //System.out.println(app.clock.millis());
+
+        // //Draw trees
+        // for (Tree tree : trees){
+        //     tree.draw(app);
+        // }
+
+        //app.image(this.terrainGraphics, App.HEIGHT, App.WIDTH); 
+        app.image(this.terrainGraphics, 0, 0); 
+        //System.out.println("Drawing image");
     }
 
     //How to display object when printed
