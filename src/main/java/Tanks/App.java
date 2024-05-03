@@ -41,6 +41,7 @@ public class App extends PApplet {
     public PImage tree;
     private char[][] terrain = new char[BOARD_HEIGHT][28];
     Terrain gameTerraine;
+    boolean gameOver = false;
 
     public ArrayList<Integer> treePositions = new ArrayList<Integer>();
     public ArrayList<Tree> trees = new ArrayList<Tree>();
@@ -161,33 +162,45 @@ public class App extends PApplet {
     public void keyPressed(KeyEvent event){
         System.out.println("Keyboard pressed: "+ event.getKeyCode());
 
-        if(event.getKeyCode() == 39){
-            System.out.println("Forward pressed");
-            currentPlayer.forward();
-        }else if(event.getKeyCode() == 37){
-            System.out.println("Back pressed");
-            currentPlayer.backward();
-        }else if(event.getKeyCode() == 38){
-            System.out.println("Up button pressed");
-            currentPlayer.turrentMovement(-1);
-        }else if(event.getKeyCode() == 40){
-            System.out.println("Down button pressed");
-            currentPlayer.turrentMovement(1);
-        }else if(event.getKeyCode() == 32){
-            System.out.println("Spacebar pressed");
-            currentPlayer.fire();
-            currentPlayerNo = currentPlayerNo + 1;
-            textObject.generateRandonWind();
+        //Check for key press only if game is not Over
+        if(!gameOver){
 
-            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+            if(event.getKeyCode() == 39){
+                System.out.println("Forward pressed");
+                currentPlayer.forward();
+            }else if(event.getKeyCode() == 37){
+                System.out.println("Back pressed");
+                currentPlayer.backward();
+            }else if(event.getKeyCode() == 38){
+                System.out.println("Up button pressed");
+                currentPlayer.turrentMovement(-1);
+            }else if(event.getKeyCode() == 40){
+                System.out.println("Down button pressed");
+                currentPlayer.turrentMovement(1);
+            }else if(event.getKeyCode() == 32){
+                System.out.println("Spacebar pressed");
+                currentPlayer.fire();
                 currentPlayerNo = currentPlayerNo + 1;
+                textObject.generateRandonWind();
+
+                while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+                    currentPlayerNo = currentPlayerNo + 1;
+                }
+                System.out.println("Tanks size: "+tanks.size());
+                System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
+                System.out.println("Player letter: "+hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+                currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+                System.out.println("Current player selected");
+                //Change player
+            }else if(event.getKeyCode() == 87){
+                //W has been pressed
+                currentPlayer.turrentPower(+1);
+                //System.out.println("Button 87 pressed");
+            }else if(event.getKeyCode() == 83){
+                //S pressed
+                currentPlayer.turrentPower(-1);
+                //System.out.println("Button 83 pressed");
             }
-            System.out.println("Tanks size: "+tanks.size());
-            System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
-            System.out.println("Player letter: "+hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-            System.out.println("Current player selected");
-            //Change player
         }
 
         //39 forward
@@ -207,6 +220,9 @@ public class App extends PApplet {
             currentPlayer.stop();
         }else if(event.getKeyCode() == 38 || event.getKeyCode() == 40){
             currentPlayer.turrentMovementStop();
+        }else if(event.getKeyCode() == 83 || event.getKeyCode() == 87){
+            System.out.println("Button 83 or 87 released");
+            currentPlayer.turrentPower(0);
         }
     }
 
@@ -227,17 +243,48 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
-        
 
+        //-------------------------------------------
+        //--------Check no of players remaining------
+        //-------------------------------------------
+
+        int remainingPlayers = 0;
+        for(Tank tank : tanks.values()){
+            if(!tank.deleted){
+                remainingPlayers += 1;
+            }
+        }
+        if (remainingPlayers == 1){
+            gameOver = true;
+        }
+
+        //-------------------------------------------
+        //----------Stop game when game is over------
+        //-------------------------------------------
+
+        //-------------------------------------------
+        //----------Ensure current player is alive------
+        //-------------------------------------------
+        if(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo % hPlayerSortedLetters.size())).deleted == true && gameOver == false){
+                System.out.println("Current player is deleted");
+                currentPlayerNo = currentPlayerNo + 1;
+            }
+            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+        }
+
+        //Set image backgroud
         this.image(this.background, 0, 0);
 
+        //Draw terrain
         this.gameTerraine.draw(this);
 
+        //Draw trees
         for (Tree t : trees){
             t.draw(this);
         }
 
-
+        //Draw tanks
         for (char c : App.tanks.keySet()){
             Tank tank = tanks.get(c);
 
@@ -251,23 +298,26 @@ public class App extends PApplet {
 
 
 
-        textObject.refreshText(this);
-        textObject.draw(this);
-
         //-------------------------------------------
         //----------Draw projectiles from Queue------
         //-------------------------------------------
+
         for(int i = 0; i < projectileQueue.size(); i++){
             Projectile projectile = projectileQueue.get(i);
-            projectile.refresh();
+
+            //Only refresh if game is not over
+            if (!gameOver)projectile.refresh();
+
             if(projectile.delete){
                 projectileQueue.remove(i);
             }else{
                 //System.out.println("Projectile to delete");
                 projectile.draw(this);
             }   
-        }
-        
+        }              
+
+
+
         //-------------------------------------------
         //----------Draw explossion from Queue------
         //-------------------------------------------
@@ -279,17 +329,29 @@ public class App extends PApplet {
                 explosonObject.draw(this);
             }
         }
+
+        //Refresh text
+        textObject.refreshText(this);
+        textObject.draw(this);
+
         
-        //-------------------------------------------
-        //----------Ensure current player is alive------
-        //-------------------------------------------
-        if(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
-            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
-                System.out.println("Current player is deleted");
-                currentPlayerNo = currentPlayerNo + 1;
-            }
-            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-        }
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+
+        
+
 
 
         //----------------------------------

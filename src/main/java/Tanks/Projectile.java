@@ -3,7 +3,7 @@ package Tanks;
 public class Projectile {
     public float xPosition;
     public float yPosition;
-    public int power;
+    public double power;
 
     public float projectileGravity = (float) (3.6/30.0); //Projectile downward gravity per frame
     public float projectileXVelocity;
@@ -13,10 +13,11 @@ public class Projectile {
     public Tank sourceTank;
     public boolean delete = false;
     private int craterRadius = 30;
+    private int projectileRadius = 10;
 
     
 
-    public Projectile(float xPos, float yPos, int power, float turrentAngle, Terrain terrain, Tank tank){
+    public Projectile(float xPos, float yPos, double power, float turrentAngle, Terrain terrain, Tank tank){
         this.xPosition = xPos;
         this.yPosition = yPos;
         this.power = power;
@@ -78,11 +79,11 @@ public class Projectile {
             int start = 0;
             int end = 864;
 
-            if((int)xPosition - craterRadius > 0){
+            if( ((int)xPosition - craterRadius) > 0){
                 start = (int)xPosition - craterRadius;
             }
 
-            if((int)xPosition + craterRadius < 864){
+            if( ((int)xPosition + craterRadius) < 864){
                 end = (int)xPosition + craterRadius;
             }
 
@@ -94,18 +95,22 @@ public class Projectile {
                 //Blast radius ralative to yPosition or blast yPosition
                 float yValue = (float) Math.sqrt((craterRadius * craterRadius) - (xDifference * xDifference));
                 //System.out.println("yValue: : "+yValue+ "yValue * 2: "+(int)(yValue * 2));
+                //System.out.println("Yvalue: "+yValue+" i value: "+i);
 
                 //If there is ground above blast. In this case decrease ground by yValue * 2
                 if((yPosition - yValue ) >= terrain.terrainMovingAverageHeight[i]){
                     terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)(yValue) + (int)(yValue);
+                    //System.out.println("The ground is above blast");
                 }
                 //If the ground is above mid blast but below top blast. Remove bottom blast radius and top blast radius
                 else if(yPosition > terrain.terrainMovingAverageHeight[i] && (yPosition - yValue ) < terrain.terrainMovingAverageHeight[i]){
                     terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)yValue + (int)(yPosition - terrain.terrainMovingAverageHeight[i]);
+                    //System.out.println("The ground is between blast and mid blast");
                 }
                 //If ground is exact position as blast or below blast
                 else if((yPosition + yValue) >= terrain.terrainMovingAverageHeight[i]){
                     terrain.terrainMovingAverageHeight[i] = (int)terrain.terrainMovingAverageHeight[i] + (int)((yValue + yPosition) - terrain.terrainMovingAverageHeight[i]);
+                    //System.out.println("Ground is below mid blast");
                 }
             }
              
@@ -126,9 +131,11 @@ public class Projectile {
 
 
     public void draw(App app) {
-        app.fill(0,0,0);
+        app.fill(sourceTank.colour[0],sourceTank.colour[1],sourceTank.colour[2]);
+        app.stroke(sourceTank.colour[0],sourceTank.colour[1],sourceTank.colour[2]);
+        app.ellipse(xPosition, yPosition, projectileRadius,-projectileRadius);
         app.stroke(0,0,0);
-        app.ellipse(xPosition, yPosition, 5,-5);
+        app.noFill();
         //System.out.println("Projectile pos: "+ xPosition + " ypos: "+yPosition);
 
         

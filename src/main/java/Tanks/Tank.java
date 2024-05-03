@@ -4,9 +4,12 @@ import java.util.Arrays;
 public class Tank {
     int currentXPosition;
     int currentXPositionVal;
+    int currentYPositionVal;
+
+
     int fuelLevel; 
     int health;
-    int power; 
+    double power; 
     char player;
     Terrain t;
     int[] colour;
@@ -17,6 +20,8 @@ public class Tank {
     
 
     int direction = 0;
+    int turrentPowerDirection = 0; //-1 Decrease power, +1 Increase power
+    double turrentPowerChange = 1.2;  // Change per frame (36/30)
 
     float tankDrawYAxis;
     float tanksDrawXCenter;
@@ -46,6 +51,7 @@ public class Tank {
         this.power = 100;
         this.t = t;
         this.currentXPositionVal = initialXPosition * 32;
+        this.currentYPositionVal = t.terrainMovingAverageHeight[(initialXPosition * 32) + 16];
         this.player = player;
 
         String[] colourVal =  String.valueOf(colour).split(",");
@@ -90,6 +96,18 @@ public class Tank {
             this.stop();
         }
         
+    }
+
+    public void turrentPower(int value){
+        //Increse turrent power
+        System.out.println("Value: "+value+" Health: "+this.health);
+        if (value > 0 && this.power < 100){
+            turrentPowerDirection = 1;
+        }else if(value < 0 && this.power > 0){
+            turrentPowerDirection = -1;
+        }else{
+            turrentPowerDirection = 0;
+        }
     }
 
     public void turrentMovement(int direction){
@@ -152,6 +170,18 @@ public class Tank {
         if(turretDirection != 0){
             turrentAngle = turrentAngle +  (float)((float)turretDirection / 10);
             
+        }
+
+        if(turrentPowerDirection != 0){
+            this.power = this.power + (turrentPowerDirection * turrentPowerChange);
+        }
+
+        if(this.power > this.health){
+            this.power = this.health;
+        }
+
+        if(this.power < 0){
+            this.power = 0;
         }
 
 

@@ -81,40 +81,66 @@ public class Text {
         app.text(" "+currentPlayer.health ,(float)((25.5 * 16.0) + 155.0),(float)(2 * 16.0));
 
         //Power indicator
-        app.text("Power: "+App.currentPlayer.power ,(float)(22.0 * 16.0),(float)(3.5 * 16.0));
+        app.text("Power: "+String.format("%.1f",App.currentPlayer.power) ,(float)(22.0 * 16.0),(float)(3.5 * 16.0));
 
 
 
         if (windImage != null) app.image(windImage,(48 * 16),(3 * 16) + 4,40,-40);
         app.text(" "+windMagnitude ,(float)((48 * 16) + 45.0),(float)(2.25 * 16.0));
 
-        app.stroke(0, 0, 0);
-        app.noFill();
-        app.strokeWeight(3);
-        app.rect((float)((46 * 16)),(float)(3.5 * 16.0), 120, 20);
-        app.text("Scores", (float)((46 * 16) + 4),(float)(4.5 * 16.06));
-        app.rect((float)((46 * 16)),(float)(3.5 * 16.0) + 20, 120, 80);
-        app.strokeWeight(2);
 
+
+
+        //If game over
         int displacement = 0;
+        if (app.gameOver){
+            //Width 864
+            //Height 640
+            app.textSize(25);
+            app.text("Player A wins!",(App.WIDTH/2 - 150),(App.HEIGHT/2 - 130));
+            app.fill(149,149,149);
+            app.rect((App.WIDTH/2-150), (App.HEIGHT/2 - 60), 300,-30);
+            
+            app.rect((App.WIDTH/2-150), (App.HEIGHT/2 - 60), 300,120);
 
-        
-        for (char c : App.hPlayerSortedLetters){
-            Tank loopTank = App.tanks.get(c);
-            //System.out.println("Character: "+c);
-            app.fill(loopTank.colour[0], loopTank.colour[1], loopTank.colour[2]);
-            app.text("Player "+ loopTank.player, (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
-            app.text(loopTank.score, (float)((51 * 16) + 4),(float)((5.7 * 16.00) + displacement));
-            displacement += 20;
-        }
-        app.strokeWeight(2);
-        app.noFill();
-        //app.textSize(12);
+            app.fill(0,0,0);
+            app.text("Final Scores",(App.WIDTH/2 - 140),(App.HEIGHT/2 - 65));
+
+            displacement = 0;
+            for (char c : App.hPlayerSortedLetters){
+                Tank loopTank = App.tanks.get(c);
+                app.fill(loopTank.colour[0],loopTank.colour[1],loopTank.colour[2]);
+                app.text("Player "+loopTank.player,(App.WIDTH/2 - 140),((App.HEIGHT/2 - 35) + displacement));
+                app.text(loopTank.score,(App.WIDTH/2 +120),((App.HEIGHT/2 - 35) + displacement));
+
+                displacement += 30;
+            }
+            app.textSize(14);
+        }else{
+            app.stroke(0, 0, 0);
+            app.noFill();
+            app.strokeWeight(3);
+            app.rect((float)((46 * 16)),(float)(3.5 * 16.0), 120, 20);
+            app.text("Scores", (float)((46 * 16) + 4),(float)(4.5 * 16.06));
+            app.rect((float)((46 * 16)),(float)(3.5 * 16.0) + 20, 120, 80);
+            app.strokeWeight(2);
     
-        // for (Tank tank : App.tanks){
-        //     app.text("Player "+tank.player, (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
-        //     displacement += 20;
-        // }
+            displacement = 0;
+    
+            
+            for (char c : App.hPlayerSortedLetters){
+                Tank loopTank = App.tanks.get(c);
+                //System.out.println("Character: "+c);
+                app.fill(loopTank.colour[0], loopTank.colour[1], loopTank.colour[2]);
+                app.text("Player "+ loopTank.player, (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
+                app.text(loopTank.score, (float)((51 * 16) + 4),(float)((5.7 * 16.00) + displacement));
+                displacement += 20;
+            }
+            app.strokeWeight(2);
+            app.noFill();
+        }
+
+
 
     }
     
