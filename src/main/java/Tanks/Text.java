@@ -14,15 +14,20 @@ public class Text {
     public Tank currentPlayer;
     public int playersFuelAmount; 
     float healthLineXCoordinates;
-    public int windMagnitude;
     private int displayArrowCounter = 60;
+    private int gameOverDisplayCounter = 0;
+    private Terrain terrain;
+    
 
-    public Text(App app){
+    public Text(App app, Terrain terrain){
+        this.terrain = terrain;
         try{
             fuelImage = app.loadImage(app.getClass().getResource("fuel.png").getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
         }catch(Exception e){
             fuelImage = null;
         }
+
+
 
         try{
             windImage1 = app.loadImage(app.getClass().getResource("wind.png").getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
@@ -31,30 +36,29 @@ public class Text {
             windImage1 = null;
         }
 
-        windMagnitude = (int) ((Math.random() * (35.0 + 35.0 + 1.0)) - 35.0);
 
         
         currentPlayer = App.currentPlayer;
     }
 
-    public void generateRandonWind(){
-        windMagnitude = (int) ((Math.random() * ((35.0 + 35.0 + 1.0)) - 35.0));
-        displayArrowCounter = 60; //2 secons so 60 frames
-    }
+
 
     public void refreshText(App app){
 
         currentPlayer = App.currentPlayer;
+        displayArrowCounter = 60;
         
 
-        if(windMagnitude < 0){
+        if(terrain.windMagnitude < 0){
             windImage = windImage1;
-        }else if (windMagnitude > 0){
+        }else if (terrain.windMagnitude > 0){
             windImage = windImage2;
         }else{
             //System.out.println("Null wind image selected. Wind speed: "+windMagnitude);
             windImage = null;
         }
+
+
 
     }
 
@@ -66,11 +70,25 @@ public class Text {
         app.text("Players "+ App.currentPlayer.player +"'s turn",(1 * 32),(1 * 32));
 
         //Fuel indicator
-        app.image(fuelImage,(10 * 16),(2 * 16) + 4,20,-20);
-        app.text(App.currentPlayer.fuelLevel,(10 * 16) + 25,(2 * 16));
+        app.image(fuelImage,(10 * 16),(2 * 16) + 4,32,-32); 
+        app.text(App.currentPlayer.fuelLevel,(11 * 16) + 20,(2 * 16));
+        
+        if (App.parachuteImage != null) app.image(App.parachuteImage,(10 * 16),(5 * 16) + 4,32,-32); 
+        app.text(App.currentPlayer.parachuteNo,(11 * 16) + 20,(5 * 16) - 5);
 
+
+
+        if(currentPlayer.largerProjectile){
+            app.text("Larger Projectile",(11 * 16)+20,(7 * 16) +6);
+            app.fill(currentPlayer.colour[0], currentPlayer.colour[1], currentPlayer.colour[2]);
+            app.stroke(currentPlayer.colour[0], currentPlayer.colour[1], currentPlayer.colour[2]);
+            
+            app.ellipse((11 * 16),(7 * 16),20,20);
+        }
+        
 
         //Health indicator
+        app.fill(0, 0, 0); 
         app.text("Health: ",(22 * 16),(2 * 16));
         app.fill(currentPlayer.colour[0], currentPlayer.colour[1], currentPlayer.colour[2]);
         app.rect((float)(25.5 * 16.0), (float)(2.125 * 16.0) , 150, -16);
@@ -88,7 +106,7 @@ public class Text {
 
 
         if (windImage != null) app.image(windImage,(48 * 16),(3 * 16) + 4,40,-40);
-        app.text(" "+windMagnitude ,(float)((48 * 16) + 45.0),(float)(2.25 * 16.0));
+        app.text(" "+terrain.windMagnitude ,(float)((48 * 16) + 45.0),(float)(2.25 * 16.0));
 
 
         //Draw current player
@@ -110,8 +128,9 @@ public class Text {
             //Width 864
             //Height 640
             app.textSize(25);
-            app.text("Player A wins!",(App.WIDTH/2 - 150),(App.HEIGHT/2 - 130));
-            app.fill(149,149,149);
+            Tank winnerTank = App.tanks.get(App.hPlayerSortedLetters.get(0));
+            app.text("Player "+winnerTank.player + " wins!",(App.WIDTH/2 - 150),(App.HEIGHT/2 - 130));
+            app.fill(winnerTank.colour[0],winnerTank.colour[1],winnerTank.colour[2],20);
             app.rect((App.WIDTH/2-150), (App.HEIGHT/2 - 60), 300,-30);
             
             app.rect((App.WIDTH/2-150), (App.HEIGHT/2 - 60), 300,120);
@@ -121,14 +140,19 @@ public class Text {
 
             displacement = 0;
             for (char c : App.hPlayerSortedLetters){
-                Tank loopTank = App.tanks.get(c);
-                app.fill(loopTank.colour[0],loopTank.colour[1],loopTank.colour[2]);
-                app.text("Player "+loopTank.player,(App.WIDTH/2 - 140),((App.HEIGHT/2 - 35) + displacement));
-                app.text(loopTank.score,(App.WIDTH/2 +120),((App.HEIGHT/2 - 35) + displacement));
-
-                displacement += 30;
+                //Every 0.7 seconds is 30 * 0.7 = 21 frames
+                if(((App.hPlayerSortedLetters.indexOf(c) + 1) * (0.7 * App.FPS)) <=  gameOverDisplayCounter){
+                    Tank loopTank = App.tanks.get(c);
+                    app.fill(loopTank.colour[0],loopTank.colour[1],loopTank.colour[2]);
+                    app.text("Player "+loopTank.player,(App.WIDTH/2 - 140),((App.HEIGHT/2 - 35) + displacement));
+                    app.text(loopTank.score,(App.WIDTH/2 +100),((App.HEIGHT/2 - 35) + displacement));
+                    displacement += 30;
+                }else{
+                    gameOverDisplayCounter += 1;
+                }
             }
             app.textSize(14);
+            
         }else{
             app.stroke(0, 0, 0);
             app.noFill();

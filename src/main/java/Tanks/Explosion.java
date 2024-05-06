@@ -12,7 +12,7 @@ public class Explosion{
         this.yPosition = y;
         this.explosionRadius = 0;
         this.explosionMaxRadiud = maxRadius;
-        //System.out.println("New explossion created");
+        System.out.println("New explossion created. Radius"+maxRadius);
     }
 
     public void tick(){
@@ -22,7 +22,7 @@ public class Explosion{
             //System.out.println("Expanding explosion. Radius: "+explosionRadius);
             explosionRadius += 5;
         }else{
-            //System.out.println("Explossion is deleted");
+            System.out.println("Explossion is deleted");
             this.delete = true;
         }
     }
@@ -31,15 +31,16 @@ public class Explosion{
     public void draw(App app){
         app.stroke(255,0,0);
         app.fill(255,0,0);
-        app.ellipse(xPosition, yPosition, explosionRadius,explosionRadius);
+        app.ellipse(xPosition, yPosition, (explosionRadius * 2),(explosionRadius * 2));
+
 
         app.stroke(255,165,0);
         app.fill(255,165,0);
-        app.ellipse(xPosition, yPosition, (float) (explosionRadius*0.5),  (float) (explosionRadius*0.5));
+        app.ellipse(xPosition, yPosition, (float) ((explosionRadius*2)*0.5),  (float) ((explosionRadius * 2)*0.5));
 
         app.stroke(255,255,0);
         app.fill(255,255,0);
-        app.ellipse(xPosition, yPosition, (float) (explosionRadius*0.2), (float) (explosionRadius*0.2));
+        app.ellipse(xPosition, yPosition, (float) ((explosionRadius*2)*0.2), (float) ((explosionRadius * 2)*0.2));
 
     }
 }

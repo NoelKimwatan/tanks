@@ -1,4 +1,5 @@
 package Tanks;
+import java.util.ArrayList;
 
 public class Projectile {
     public float xPosition;
@@ -14,16 +15,25 @@ public class Projectile {
     public boolean delete = false;
     private int craterRadius = 30;
     private int projectileRadius = 10;
+    public boolean largerProjectile;
+    private int projectileEffectRadius = 30;
 
     
 
-    public Projectile(float xPos, float yPos, double power, float turrentAngle, Terrain terrain, Tank tank){
+    public Projectile(float xPos, float yPos, double power, float turrentAngle, Terrain terrain, Tank tank, boolean largerProjectile){
         this.xPosition = xPos;
         this.yPosition = yPos;
         this.power = power;
         this.turrentAngle = turrentAngle;
         this.terrain = terrain;
         this.sourceTank = tank;
+        this.largerProjectile = largerProjectile;
+
+        if(largerProjectile){
+            projectileRadius *= 2;
+            craterRadius *= 2;
+            projectileEffectRadius *=2;
+        }
         //System.out.println("Projectile created");
 
         float projectileVelocity = (float) ((float) (1.0 + (8.0/100.0 * (float)power)));
@@ -33,37 +43,62 @@ public class Projectile {
         //System.out.println("Projectile velocity: " + projectileVelocity + " Projectile x velocity: "+ projectileXVelocity + " Projectile Y velocity: "+projectileYVelocity);
     }
 
-    public void checkTankHit(){
+    public void checkTankHit(float xImpactPoint, float yImpactpoint){
         for(char tankChar : App.tanks.keySet()){
             Tank tank = App.tanks.get(tankChar);
+            
 
             if (tank.deleted) continue;
 
-            // System.out.println("Tanks position x: "+tank.currentXPositionVal+" y: "+tank.currentYPositionVal);
-            // System.out.println("Projectile position: x: "+xPosition+" y: "+yPosition);
-            // System.out.println("Terraine: y: "+terrain.terrainMovingAverageHeight[(int)xPosition]);
+            double tanksLeftEdge = tank.currentXPositionVal - (Tank.tanksBottonWidth/2);
+            double tanksRightEdge = tank.currentXPositionVal + (Tank.tanksBottonWidth/2);
+            double tanksTopEdge = tank.currentYPositionVal - (Tank.tanksHeight);
+            int explosionDamage;
+            double minXDistance;
+            double minYDistance;
 
-            double xdistance = tank.currentXPositionVal - xPosition;
-            //For exact damage calc use level value
-            //double ydistance = tank.currentYPositionVal - yPosition;
-            double ydistance = tank.currentYPositionVal - terrain.terrainMovingAverageHeight[(int)xPosition];
-            double distance = Math.sqrt( ((xdistance * xdistance) + (ydistance * ydistance)) );
-            //System.out.println("Distance: "+distance+ " Int distance: "+(int)distance);
+
+            // System.out.println("Explossion point: X:"+xPosition+" Y:"+yPosition);
+            // System.out.println("Tanks X position: Left:"+tanksLeftEdge+" Center: "+tank.currentXPositionVal+" Right: "+tanksRightEdge);
+            // System.out.println("Tanks Y position: Bottom:"+tank.currentYPositionVal+" Top: "+tanksTopEdge);
+
+
+
+            //Find min  Y distance
+            if(tank.currentYPositionVal >= yImpactpoint && tanksTopEdge <= yImpactpoint){
+                minYDistance = 0;
+            }else{
+                double ydistanceBottom = Math.abs(tank.currentYPositionVal - yImpactpoint);
+                double ydistanceTop = Math.abs((tank.currentYPositionVal - (Tank.tanksHeight)) - yImpactpoint);
+                minYDistance = Math.min(ydistanceTop,ydistanceBottom);                
+            }
+
+            //Find min X distance
+            if(tanksLeftEdge <= xImpactPoint && tanksRightEdge >= xImpactPoint){
+                minXDistance = 0;
+            }else{
+                double xDistanceLeft = Math.abs(tanksLeftEdge - xImpactPoint);
+                double xDistanceRight = Math.abs(tanksRightEdge - xImpactPoint);       
+                minXDistance = Math.min(xDistanceLeft,xDistanceRight);     
+            }
+
+            
+
+            double distanceVector = Math.sqrt( ((minXDistance * minXDistance) + (minYDistance * minYDistance)) );
+            //System.out.println("Min X distance: "+minXDistance+" Min Y distance: "+minYDistance+" Distance vector: "+distanceVector);
 
             //Check if tank is within blast radius
-            if(distance <= 30 ){
-                int explosionDamage = (int) ((1 - distance/30)*60);
+            if(distanceVector <= projectileEffectRadius ){
+                explosionDamage = (int) ((1 - distanceVector/projectileEffectRadius)*60);
                 System.out.println("Explossion damage: "+explosionDamage);
-                tank.tankDamage(explosionDamage);
-
-
-                if(tank != this.sourceTank){
-                    System.out.println("Damaged another player");
-                    this.sourceTank.score += (int) explosionDamage;
-                }else{
-                    System.out.println("Damaged self");
-                }
+                tank.tankDamage(explosionDamage, this);
             }
+
+            //Check if tank is falling
+            if(minXDistance <= projectileEffectRadius){
+                tank.checkTankFalling(this);
+            }
+
         }
     }
 
@@ -75,8 +110,10 @@ public class Projectile {
         //Check if it has hit the ground
         else if(terrain.terrainMovingAverageHeight[(int)xPosition] <= (int)yPosition){
 
+            float xImpactPoint = xPosition;
+            float yImpactPoint = terrain.terrainMovingAverageHeight[(int)xPosition];
 
-            checkTankHit();
+            
 
             //Looping through the blast diameter
             int start = 0;
@@ -116,15 +153,23 @@ public class Projectile {
                     //System.out.println("Ground is below mid blast");
                 }
             }
-             
+
+
+            checkTankHit(xImpactPoint,yImpactPoint);
+
             System.out.println("Projectile has hit the ground");
             delete = true;
-            Explosion projectileExplossion = new Explosion( (int)xPosition, (int)yPosition, 30 );
-            App.explossionQueue.add(projectileExplossion);
+            
 
-        //Check if projectile has gone beyond the screen
+
+            Explosion projectileExplossion = new Explosion( (int)xPosition, (int)yPosition, projectileEffectRadius );
+            App.explossionQueue.add(projectileExplossion);
+            terrain.drawTerraingraphics();
+
+        //Projectile is still in screen
         }else{
-            xPosition = xPosition + projectileXVelocity;
+            //Effects of wind W * 0.03 pixels per second == (w * 0.03)/30
+            xPosition = xPosition + projectileXVelocity + (float)(terrain.windMagnitude * 0.03)/30;
             yPosition = yPosition - projectileYVelocity;
             projectileYVelocity = projectileYVelocity - projectileGravity;
     

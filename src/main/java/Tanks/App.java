@@ -38,11 +38,15 @@ public class App extends PApplet {
 
     //Created
     public PImage background;
+    public static PImage parachuteImage;
     public int[] foreGroundColor;
     public PImage tree;
     private char[][] terrain = new char[BOARD_HEIGHT][28];
     Terrain gameTerraine;
     boolean gameOver = false;
+    int changeLevelCounter = 30;  //1 second == 30 frames
+    int levelNo = 0;
+    public static boolean newGame = true;
 
     //To remove
     public Clock clock = Clock.systemDefaultZone();
@@ -93,7 +97,7 @@ public class App extends PApplet {
 
         //Loading configPath
         JSONObject configJSON = loadJSONObject(configPath);
-        int levelNo = 0;
+        
 
         String backgroundFileName = configJSON.getJSONArray("levels").getJSONObject(levelNo).get("background").toString();
         String terrainFileName = configJSON.getJSONArray("levels").getJSONObject(levelNo).get("layout").toString();
@@ -108,6 +112,7 @@ public class App extends PApplet {
         }
 
 
+
         //Loading the snow background image
         this.background = this.loadImage(this.getClass().getResource(backgroundFileName).getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
         this.foreGroundColor  = new int[]{Integer.valueOf(foreGroundColorName[0]), Integer.valueOf(foreGroundColorName[0]), Integer.valueOf(foreGroundColorName[0])};
@@ -118,7 +123,12 @@ public class App extends PApplet {
         }else{
             this.tree = null;
         }
-
+        
+        try{
+            parachuteImage =loadImage(getClass().getResource("parachute.png").getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
+        }catch(Exception e){
+            parachuteImage = null;
+        }
         //Loading terraine
         //File level = this.
         File levelFile = new File(terrainFileName);
@@ -154,7 +164,7 @@ public class App extends PApplet {
         System.out.println("Printing terraine: "+gameTerraine);
 
         //Setup text
-        textObject = new Text(this);
+        textObject = new Text(this,gameTerraine);
 
 
 
@@ -166,27 +176,28 @@ public class App extends PApplet {
 	@Override
     public void keyPressed(KeyEvent event){
         System.out.println("Keyboard pressed: "+ event.getKeyCode());
+        int code = event.getKeyCode();
 
         //Check for key press only if game is not Over
         if(!gameOver){
 
-            if(event.getKeyCode() == 39){
+            if(code == 39){
                 System.out.println("Forward pressed");
                 currentPlayer.move(1);
-            }else if(event.getKeyCode() == 37){
+            }else if(code == 37){
                 //System.out.println("Back pressed");
                 currentPlayer.move(-1);
-            }else if(event.getKeyCode() == 38){
+            }else if(code == 38){
                 //System.out.println("Up button pressed");
                 currentPlayer.turrentMovement(-1);
-            }else if(event.getKeyCode() == 40){
+            }else if(code == 40){
                 //System.out.println("Down button pressed");
                 currentPlayer.turrentMovement(1);
-            }else if(event.getKeyCode() == 32){
+            }else if(code == 32){
                 //System.out.println("Spacebar pressed");
                 currentPlayer.fire();
                 currentPlayerNo = currentPlayerNo + 1;
-                textObject.generateRandonWind();
+                gameTerraine.changeWind();
 
                 while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
                     currentPlayerNo = currentPlayerNo + 1;
@@ -197,14 +208,31 @@ public class App extends PApplet {
                 currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
                 //System.out.println("Current player selected");
                 //Change player
-            }else if(event.getKeyCode() == 87){
+                if(alivePlayers.size() <= 1){
+                    changeLevel();
+                }
+
+            }else if(code == 87){
                 //W has been pressed
                 currentPlayer.turrentPower(+1);
                 //System.out.println("Button 87 pressed");
-            }else if(event.getKeyCode() == 83){
+            }else if(code == 83){
                 //S pressed
                 currentPlayer.turrentPower(-1);
                 //System.out.println("Button 83 pressed");
+            }else if(code == 80 || code == 82 || code == 70 || code == 88){
+                //Check if player has pressed p to purchase parachute
+                // 80, 82, 70
+                currentPlayer.handlePowerUps(code);
+
+            }
+        }else{
+            if(code == 82){
+                System.out.println("Game reset");
+                levelNo = 0;
+                App.newGame = true;
+                gameOver = false;
+                setup();
             }
         }
 
@@ -249,16 +277,58 @@ public class App extends PApplet {
         this.gameTerraine.draw(this);
     }
 
+    private void changeLevel(){
+        explossionQueue.clear();
+        projectileQueue.clear();
+
+        if(levelNo == 2){
+            gameOver = true;
+            System.out.println("Game over");
+            hPlayerSortedLetters.sort(new Comparator<Character>(){
+                public int compare(Character c1, Character c2){
+                    return Integer.compare(App.tanks.get(c2).score, App.tanks.get(c1).score);
+                }
+            });
+        }else{
+            System.out.println("Level over");
+            levelNo += 1;
+            App.newGame = false;
+            setup();
+        }
+
+    }
+
     /**
      * Draw all elements in the game by current frame.
      */
 	@Override
     public void draw() {
-        System.out.println(clock.millis());
+        //System.out.println(clock.millis());
 
         //-------------------------------------------
         //--------Check no of players remaining------
         //-------------------------------------------
+        if(alivePlayers.size() <= 1){
+            System.out.println("Level over");
+            changeLevelCounter -= 1;
+
+            if(changeLevelCounter <= 0){
+                changeLevelCounter = 60;
+                changeLevel();
+            }
+        }
+        
+        
+        //----------------------------------------------
+        //------Check is current player is deleted------
+        //----------------------------------------------
+        if(currentPlayer.deleted == true){
+            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+                System.out.println("Current player is deleted");
+                currentPlayerNo = currentPlayerNo + 1;
+            }
+            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+        }
 
 
 
@@ -272,12 +342,26 @@ public class App extends PApplet {
 
         this.gameTerraine.draw(this);
 
-
+        // -------------------------------------------
+        // ----------Draw explossion from Queue------
+        // -------------------------------------------
+        if(explossionQueue.size() > 0){
+            for(int i = 0; i < explossionQueue.size(); i++){
+                Explosion explosonObject = explossionQueue.get(i);
+                if(explosonObject.delete){
+                    explossionQueue.remove(i);
+                }else{
+                    explosonObject.tick();
+                    explosonObject.draw(this);
+                }
+            }
+        }
 
 
         //Draw tanks
         for (char c : alivePlayers){
             Tank tank = tanks.get(c);
+            //System.out.println(tank);
 
             //Do not draw deleted tank
             if(!tank.deleted){
@@ -292,6 +376,7 @@ public class App extends PApplet {
         //-------------------------------------------
 
         if(projectileQueue.size() > 0){
+            System.out.println("Alive players: "+alivePlayers.size());
             for(int i = 0; i < projectileQueue.size(); i++){
                 Projectile projectile = projectileQueue.get(i);
     
@@ -310,44 +395,12 @@ public class App extends PApplet {
 
 
 
-        // -------------------------------------------
-        // ----------Draw explossion from Queue------
-        // -------------------------------------------
-        if(explossionQueue.size() > 0){
-            for(int i = 0; i < explossionQueue.size(); i++){
-                Explosion explosonObject = explossionQueue.get(i);
-                if(explosonObject.delete){
-                    explossionQueue.remove(i);
-                }else{
-                    explosonObject.tick();
-                    explosonObject.draw(this);
-                }
-            }
-        }
+
 
 
         //Refresh text
         textObject.refreshText(this);
         textObject.draw(this);
-
-        
-
-
-
-
-
-
-
-
-
-
-
-
-
-        
-
-        
-
 
 
         //----------------------------------
