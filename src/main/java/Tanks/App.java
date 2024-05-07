@@ -16,6 +16,7 @@ import java.io.*;
 import java.util.*;
 import java.time.Clock;
 
+
 public class App extends PApplet {
 
     public static final int CELLSIZE = 32; //8;
@@ -182,7 +183,7 @@ public class App extends PApplet {
         if(!gameOver){
 
             if(code == 39){
-                System.out.println("Forward pressed");
+                //System.out.println("Forward pressed");
                 currentPlayer.move(1);
             }else if(code == 37){
                 //System.out.println("Back pressed");
@@ -291,6 +292,7 @@ public class App extends PApplet {
             });
         }else{
             System.out.println("Level over");
+            currentPlayerNo = 0;
             levelNo += 1;
             App.newGame = false;
             setup();
@@ -357,18 +359,19 @@ public class App extends PApplet {
             }
         }
 
-
-        //Draw tanks
-        for (char c : alivePlayers){
-            Tank tank = tanks.get(c);
-            //System.out.println(tank);
-
-            //Do not draw deleted tank
+        //Remove dead players
+        for(Tank tank: tanks.values()){
             if(!tank.deleted){
                 tank.draw(this);
+            }else{
+                if(App.alivePlayers.contains(tank.player)){
+                    App.alivePlayers.remove(App.alivePlayers.indexOf(tank.player)); 
+                    System.out.println("Tank deleted");
+                }            
             }
-
         }
+
+
 
 
         //-------------------------------------------

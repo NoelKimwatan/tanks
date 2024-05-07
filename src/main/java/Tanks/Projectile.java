@@ -104,8 +104,8 @@ public class Projectile {
 
     public void refresh(){
         //Check if projectile has gone beyond screen
-        if(xPosition >= App.WIDTH || xPosition < 0){
-            delete = true;
+        if(xPosition >= App.WIDTH || xPosition < 0 || yPosition > App.HEIGHT){
+            this.delete = true;
         }
         //Check if it has hit the ground
         else if(terrain.terrainMovingAverageHeight[(int)xPosition] <= (int)yPosition){
@@ -168,8 +168,8 @@ public class Projectile {
 
         //Projectile is still in screen
         }else{
-            //Effects of wind W * 0.03 pixels per second == (w * 0.03)/30
-            xPosition = xPosition + projectileXVelocity + (float)(terrain.windMagnitude * 0.03)/30;
+            //Effects of wind W * 0.03 pixels per second == (w * 0.03)
+            xPosition = xPosition + projectileXVelocity + (float)(terrain.windMagnitude * 0.03);
             yPosition = yPosition - projectileYVelocity;
             projectileYVelocity = projectileYVelocity - projectileGravity;
     

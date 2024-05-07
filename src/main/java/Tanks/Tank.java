@@ -1,6 +1,7 @@
 package Tanks;
 import java.util.Arrays;
 
+
 public class Tank {
     int currentXPosition;
     int currentXPositionVal;
@@ -105,33 +106,42 @@ public class Tank {
 
     }
 
+    //Check if tank below Map
+    public void tankBelowMap(){
+        currentYPositionVal = 640;
+        tankFalling = false;
+        tankFallingSpeed = 0;
+        tankCanMove = false;
+        direction = 0;
+        this.deleted = true;
+
+        Explosion tankExplosion = new Explosion(this.currentXPositionVal,640, 30);
+        App.explossionQueue.add(tankExplosion);
+    }
+
+
+    //Set or change the health of a tank
     public int setHealth(int change){
         int healthChange = 0;
-
-        if((this.health + change) <= 0){
-            healthChange = this.health;
-            this.health = 0;
-
-            try{
-                App.alivePlayers.remove(App.alivePlayers.indexOf(this.player));
-            }catch(Exception e){
-                System.out.println("------------------Resolve this exception--------------------");
-                System.out.print(e);
+        //Only set health for a none deleted Tank
+        if(this.deleted == false){
+            if((this.health + change) <= 0){
+                healthChange = this.health;
+                this.health = 0;
+                this.deleted = true;
+                this.tankFalling = false;
+                this.deleted = true;
+                Explosion tankExplosion = new Explosion(this.currentXPositionVal,t.terrainMovingAverageHeight[(int)this.currentXPositionVal], 15);
+                App.explossionQueue.add(tankExplosion);
+                
+            }else if((this.health + change) >= 100){
+                this.health = 100;
+                healthChange = (100 - this.health);
+            }else{
+                this.health += change;
+                healthChange = change;
             }
-            
-            this.deleted = true;
-            Explosion tankExplosion = new Explosion(this.currentXPositionVal,t.terrainMovingAverageHeight[(int)this.currentXPositionVal], 15);
-            App.explossionQueue.add(tankExplosion);
-            
-        }else if((this.health + change) >= 100){
-            this.health = 100;
-            healthChange = (100 - this.health);
-        }else{
-            this.health += change;
-            healthChange = change;
-
         }
-
         return healthChange;
     }
 
@@ -164,6 +174,8 @@ public class Tank {
         //     System.out.println("Player removed");
         //     System.out.println("Player value:"+player);
         // }
+
+
 
         if(App.currentPlayer != this){
             this.move(0);
@@ -202,10 +214,17 @@ public class Tank {
             currentXPositionVal = currentXPositionVal + speed;
             currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
             fuelLevel = fuelLevel - speed;
+
+            if(currentYPositionVal > 640){
+                tankBelowMap();
+            }
         }else if(direction == -1){
             currentXPositionVal = currentXPositionVal - speed;
             currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
             fuelLevel = fuelLevel - speed;
+            if(currentYPositionVal > 640){
+                tankBelowMap();
+            }
         }
 
         //Change turrets direction
@@ -226,6 +245,9 @@ public class Tank {
                 tankFallingSpeed = 0;
                 tankCanMove = true;
                 this.currentYPositionVal = t.terrainMovingAverageHeight[(int)this.currentXPositionVal];
+            }
+            if(currentYPositionVal > 640){
+                tankBelowMap();
             }
         }
 
@@ -258,13 +280,14 @@ public class Tank {
 
 
 
+
     public void checkTankFalling(Projectile projectileHit){
         //Check if tank is floating
         if(this.t.terrainMovingAverageHeight[(int)this.currentXPositionVal] > currentYPositionVal && this.tankFalling == false){
+            System.out.println("Tank is floating");
             this.move(0);
             tankCanMove = false;
             this.tankFalling = true;
-            System.out.println("Tank is floating");
 
             if(parachuteNo >= 1){
                 //Falling speed 120 pixels per second with no parachutes and 60 with parachutes
@@ -277,8 +300,6 @@ public class Tank {
                 pixelsDropped = Math.abs(t.terrainMovingAverageHeight[(int)this.currentXPositionVal] - this.currentYPositionVal);
                 tankDamage(pixelsDropped, projectileHit);
             }
-
-
         }
     }
 
@@ -337,11 +358,6 @@ public class Tank {
         app.noFill();
 
         app.rect((currentXPositionVal - tanksBottonWidth/2),currentYPositionVal,tanksBottonWidth,-16);
-
-
-
-
-
 
     }
 
