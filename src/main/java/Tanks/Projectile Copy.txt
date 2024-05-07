@@ -17,7 +17,6 @@ public class Projectile {
     private int projectileRadius = 10;
     public boolean largerProjectile;
     private int projectileEffectRadius = 30;
-    private int maxProjectileDamage = 60;
 
     
 
@@ -45,15 +44,22 @@ public class Projectile {
     }
 
     public void checkTankHit(float xImpactPoint, float yImpactpoint){
-        for(Tank tank : App.tanks.values()){
+        for(char tankChar : App.tanks.keySet()){
+            Tank tank = App.tanks.get(tankChar);
             
-        
+
             if (tank.deleted) continue;
 
             int explosionDamage;
             double minXDistance;
             double minYDistance;
+
+
             System.out.println("Explossion point: X:"+xPosition+" Y:"+yPosition);
+            // System.out.println("Tanks X position: Left:"+tanksLeftEdge+" Center: "+tank.currentXPositionVal+" Right: "+tanksRightEdge);
+            // System.out.println("Tanks Y position: Bottom:"+tank.currentYPositionVal+" Top: "+tanksTopEdge);
+
+
 
             //Find min  Y distance
             if(tank.currentYPositionVal >= yImpactpoint && tank.tanksYTopEdge <= yImpactpoint){
@@ -73,67 +79,25 @@ public class Projectile {
                 minXDistance = Math.min(xDistanceLeft,xDistanceRight);     
             }
 
-            double distanceVector = Math.sqrt( ((minXDistance * minXDistance) + (minYDistance * minYDistance)) );
+            
 
+            double distanceVector = Math.sqrt( ((minXDistance * minXDistance) + (minYDistance * minYDistance)) );
+            //System.out.println("Min X distance: "+minXDistance+" Min Y distance: "+minYDistance+" Distance vector: "+distanceVector);
+
+            //Check if tank is within blast radius
             if(distanceVector <= projectileEffectRadius ){
                 explosionDamage = (int) ((1 - distanceVector/projectileEffectRadius)*60);
                 System.out.println("Explossion damage: "+explosionDamage);
                 tank.tankDamage(explosionDamage, this);
             }
 
-            tank.checkTankFalling(this);
-            
+            //Check if tank is falling
+            if(minXDistance <= this.projectileEffectRadius){
+                System.out.println("Tank falling");
+                tank.checkTankFalling(this);
+            }
+
         }
-    }
-
-    public void deformTerrain(double xImpactPoint, double yImpactPoint){
-            //Looping through the blast diameter
-            int start = 0;
-            int end = 864;
-
-            if( ((int)xImpactPoint - craterRadius) > 0){
-                start = (int)xImpactPoint - craterRadius;
-            }
-
-            if( ((int)xImpactPoint + craterRadius) < 864){
-                end = (int)xImpactPoint + craterRadius;
-            }
-
-            for(int i = start; i <= end; i++){
-
-                int xDifference = i - (int)xImpactPoint;
-
-                //Blast radius ralative to yPosition or blast yPosition
-                float yValue = (float) Math.sqrt((craterRadius * craterRadius) - (xDifference * xDifference));
-                //System.out.println("yValue: : "+yValue+ "yValue * 2: "+(int)(yValue * 2));
-                //System.out.println("Yvalue: "+yValue+" i value: "+i);
-
-                //If there is ground above blast. In this case decrease ground by yValue * 2
-                if((yImpactPoint - yValue ) >= terrain.terrainMovingAverageHeight[i]){
-                    terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)(yValue) + (int)(yValue);
-                    //System.out.println("The ground is above blast");
-                }
-                //If the ground is above mid blast but below top blast. Remove bottom blast radius and top blast radius
-                else if(yImpactPoint > terrain.terrainMovingAverageHeight[i] && (yPosition - yValue ) < terrain.terrainMovingAverageHeight[i]){
-                    terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)yValue + (int)(yPosition - terrain.terrainMovingAverageHeight[i]);
-                    //System.out.println("The ground is between blast and mid blast");
-                }
-                //If ground is exact position as blast or below blast
-                else if((yImpactPoint + yValue) >= terrain.terrainMovingAverageHeight[i]){
-                    terrain.terrainMovingAverageHeight[i] = (int)terrain.terrainMovingAverageHeight[i] + (int)((yValue + yPosition) - terrain.terrainMovingAverageHeight[i]);
-                    //System.out.println("Ground is below mid blast");
-                }
-            }  
-
-            terrain.drawTerraingraphics();         
-    }
-
-    public void projectileImpact(double xImpactPoint, double yImpactPoint){
-        System.out.println("Projectile Impact");
-        this.delete = true;
-        Explosion projectileExplossion = new Explosion( (int)xPosition, (int)yPosition, projectileEffectRadius );
-        App.explossionQueue.add(projectileExplossion);
-        
     }
 
     public void refresh(){
@@ -143,28 +107,65 @@ public class Projectile {
         }
         //Check if it has hit the ground
         else if(terrain.terrainMovingAverageHeight[(int)xPosition] <= (int)yPosition){
-            yPosition = terrain.terrainMovingAverageHeight[(int)xPosition];
 
-            projectileImpact(xPosition,yPosition);
-            deformTerrain(xPosition,yPosition);
-            checkTankHit((float)xPosition,(float)yPosition);
-            System.out.println("Projectile has hit the ground");
-        //Projectile is still in screen
-        }else{
+            float xImpactPoint = xPosition;
+            float yImpactPoint = terrain.terrainMovingAverageHeight[(int)xPosition];
 
-            for(Tank tank : App.tanks.values()){
-                if(tank.tanksXLeftEdge < this.xPosition && tank.tanksXRightEdge > this.xPosition && tank.currentYPositionVal > this.yPosition && tank.tanksYTopEdge < this.yPosition){ 
-                    System.out.println("Tank direct hit");
-                    projectileImpact((double)xPosition,(double)xPosition);
-                    deformTerrain(xPosition,yPosition);
-                    tank.tankDamage(this.maxProjectileDamage, this);
-                    tank.checkTankFalling(this);
+            
+
+            //Looping through the blast diameter
+            int start = 0;
+            int end = 864;
+
+            if( ((int)xPosition - craterRadius) > 0){
+                start = (int)xPosition - craterRadius;
+            }
+
+            if( ((int)xPosition + craterRadius) < 864){
+                end = (int)xPosition + craterRadius;
+            }
+
+            for(int i = start; i <= end; i++){
+
+                //Since we assume blast source is point (0,0)
+                int xDifference = i - (int)xPosition;
+
+                //Blast radius ralative to yPosition or blast yPosition
+                float yValue = (float) Math.sqrt((craterRadius * craterRadius) - (xDifference * xDifference));
+                //System.out.println("yValue: : "+yValue+ "yValue * 2: "+(int)(yValue * 2));
+                //System.out.println("Yvalue: "+yValue+" i value: "+i);
+
+                //If there is ground above blast. In this case decrease ground by yValue * 2
+                if((yPosition - yValue ) >= terrain.terrainMovingAverageHeight[i]){
+                    terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)(yValue) + (int)(yValue);
+                    //System.out.println("The ground is above blast");
+                }
+                //If the ground is above mid blast but below top blast. Remove bottom blast radius and top blast radius
+                else if(yPosition > terrain.terrainMovingAverageHeight[i] && (yPosition - yValue ) < terrain.terrainMovingAverageHeight[i]){
+                    terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)yValue + (int)(yPosition - terrain.terrainMovingAverageHeight[i]);
+                    //System.out.println("The ground is between blast and mid blast");
+                }
+                //If ground is exact position as blast or below blast
+                else if((yPosition + yValue) >= terrain.terrainMovingAverageHeight[i]){
+                    terrain.terrainMovingAverageHeight[i] = (int)terrain.terrainMovingAverageHeight[i] + (int)((yValue + yPosition) - terrain.terrainMovingAverageHeight[i]);
+                    //System.out.println("Ground is below mid blast");
                 }
             }
 
-            //checkTankHit((float)xPosition,(float)yPosition);
-            //checkTankHit((float)xPosition,(float)terrain.terrainMovingAverageHeight[(int)xPosition]);
 
+            checkTankHit(xImpactPoint,yImpactPoint);
+
+            System.out.println("Projectile has hit the ground");
+            delete = true;
+            
+
+
+            Explosion projectileExplossion = new Explosion( (int)xPosition, (int)yPosition, projectileEffectRadius );
+            App.explossionQueue.add(projectileExplossion);
+            terrain.drawTerraingraphics();
+
+        //Projectile is still in screen
+        }else{
             //Effects of wind W * 0.03 pixels per second == (w * 0.03)
             xPosition = xPosition + projectileXVelocity + (float)(terrain.windMagnitude * 0.03);
             yPosition = yPosition - projectileYVelocity;
@@ -172,6 +173,16 @@ public class Projectile {
     
             //System.out.println("Projectile Y velocity: "+projectileYVelocity);
         }
+
+        for(Tank tank : App.tanks.values()){
+            if(tank.tanksXLeftEdge <= this.xPosition && tank.tanksXRightEdge >= this.xPosition && tank.currentYPositionVal >= this.yPosition && tank.tanksYTopEdge <= this.yPosition){ 
+                System.out.println("Tank direct hit");
+                this.delete = true;
+                Explosion projectileExplossion = new Explosion( (int)xPosition, (int)yPosition, projectileEffectRadius );
+                App.explossionQueue.add(projectileExplossion);
+            }
+        }
+
     }
 
 

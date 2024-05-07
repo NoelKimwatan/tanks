@@ -200,7 +200,7 @@ public class App extends PApplet {
                 currentPlayerNo = currentPlayerNo + 1;
                 gameTerraine.changeWind();
 
-                while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+                while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true &&  alivePlayers.size() > 1){
                     currentPlayerNo = currentPlayerNo + 1;
                 }
                 //System.out.println("Tanks size: "+tanks.size());
@@ -325,7 +325,7 @@ public class App extends PApplet {
         //------Check is current player is deleted------
         //----------------------------------------------
         if(currentPlayer.deleted == true){
-            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true){
+            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).deleted == true && alivePlayers.size() > 1){
                 System.out.println("Current player is deleted");
                 currentPlayerNo = currentPlayerNo + 1;
             }

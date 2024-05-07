@@ -7,6 +7,9 @@ public class Tank {
     int currentXPositionVal;
     int currentYPositionVal;
 
+    double tanksXLeftEdge;
+    double tanksXRightEdge;
+    double tanksYTopEdge;
 
     int fuelLevel; 
     int health;
@@ -42,9 +45,9 @@ public class Tank {
     float tanksTurrentWidth = 2;
     float tanksTurrentLength = 15;
 
-    public static float tanksBottonWidth = 32;
+    public static float tanksBottonWidth = 28;
     public static float tanksHeight = 16;
-    float tanksTopWidth = 26;
+    float tanksTopWidth = 24;
     float tanksSideCurves = 5;
 
 
@@ -67,6 +70,10 @@ public class Tank {
         this.currentYPositionVal = t.terrainMovingAverageHeight[currentXPositionVal];
         this.player = player;
 
+        this.tanksXLeftEdge = this.currentXPositionVal - (Tank.tanksBottonWidth/2);
+        this.tanksXRightEdge = this.currentXPositionVal + (Tank.tanksBottonWidth/2);
+        this.tanksYTopEdge = this.currentYPositionVal - (Tank.tanksHeight);
+
         String[] colourVal =  String.valueOf(colour).split(",");
         this.colour = new int[]{Integer.valueOf(colourVal[0]), Integer.valueOf(colourVal[1]), Integer.valueOf(colourVal[2])};
         //System.out.println("Tank created");
@@ -84,6 +91,10 @@ public class Tank {
         this.health = 100;
         this.deleted = false;
         this.turrentAngle = 0;
+
+        this.tanksXLeftEdge = this.currentXPositionVal - (Tank.tanksBottonWidth/2);
+        this.tanksXRightEdge = this.currentXPositionVal + (Tank.tanksBottonWidth/2);
+        this.tanksYTopEdge = this.currentYPositionVal - (Tank.tanksHeight);        
     }
 
     public void handlePowerUps(int code){
@@ -207,25 +218,29 @@ public class Tank {
         }
 
 
-
-
         //Change direction
-        if(direction == 1){
-            currentXPositionVal = currentXPositionVal + speed;
-            currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
-            fuelLevel = fuelLevel - speed;
-
-            if(currentYPositionVal > 640){
-                tankBelowMap();
+        if(direction != 0){
+        
+            if(direction == 1){
+                currentXPositionVal = currentXPositionVal + speed; 
+            }else if(direction == -1){
+                currentXPositionVal = currentXPositionVal - speed;
             }
-        }else if(direction == -1){
-            currentXPositionVal = currentXPositionVal - speed;
-            currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
+
             fuelLevel = fuelLevel - speed;
+            currentYPositionVal = this.t.terrainMovingAverageHeight[currentXPositionVal];
+
+            //Changing tanks Edges
+            tanksXLeftEdge = this.currentXPositionVal - (Tank.tanksBottonWidth/2);
+            tanksXRightEdge = this.currentXPositionVal + (Tank.tanksBottonWidth/2);
+            tanksYTopEdge = this.currentYPositionVal - (Tank.tanksHeight);
+
             if(currentYPositionVal > 640){
                 tankBelowMap();
             }
         }
+
+
 
         //Change turrets direction
         if(turretDirection != 0){
@@ -249,6 +264,10 @@ public class Tank {
             if(currentYPositionVal > 640){
                 tankBelowMap();
             }
+
+            tanksXLeftEdge = this.currentXPositionVal - (Tank.tanksBottonWidth/2);
+            tanksXRightEdge = this.currentXPositionVal + (Tank.tanksBottonWidth/2);
+            tanksYTopEdge = this.currentYPositionVal - (Tank.tanksHeight);
         }
 
 
