@@ -14,6 +14,11 @@ plugins {
 
     id 'jacoco'
 }
+
+javadoc {
+    destinationDir = file("${buildDir}/docs/javadoc")
+}
+
 version = '1.0'
 repositories {
     // Use jcenter for resolving dependencies.
