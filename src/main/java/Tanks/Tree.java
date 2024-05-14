@@ -10,6 +10,7 @@ public class Tree {
     private Terrain t;
     private PImage treeImage;
     private int xPositionVal;
+    private int treeDisplayDimensions = 32;
 
     /**
      * The tree constructor
@@ -21,9 +22,32 @@ public class Tree {
         this.xPosition = xPosition;
         this.t = t;
         this.treeImage = image;
-        this.xPositionVal = (xPosition * 32);
+
+        this.xPositionVal = randomizeTreeXPosition(xPosition*32);
     }
     
+    /**
+     * A tree X-position randomizer. The function uses the random function to randomises the X-position of the tree to +-15 px around starting point which is 30px around starting point.
+     * The function ensures that the tree position does not go beyond the App screen
+     * @param treeXPosition The trees initial starting point
+     * @return The randomised tree position
+     */
+    public int randomizeTreeXPosition(int treeXPosition){
+        //Randomise +-15 hence 30px around starting point
+        int randomisedValue = (int) ((Math.random() * ((15.0 + 15.0 + 1.0)) - 15.0));
+        int randomisedTreePosition = treeXPosition + randomisedValue;
+
+        //Make sure value is withing range
+        if(randomisedTreePosition <= 0){
+            randomisedTreePosition = 0;
+        }else if(randomisedTreePosition >= App.WIDTH){
+            randomisedTreePosition = App.WIDTH - treeDisplayDimensions;
+        }
+
+        //System.out.println("Initial tree position: "+treeXPosition+" Randomised tree value: "+randomisedValue+" Final randomised value: "+randomisedTreePosition);
+
+        return randomisedTreePosition;
+    }
 
     /**
      * The draw function draws the tree on the terrain
@@ -33,7 +57,8 @@ public class Tree {
         //System.out.println("You should see a tree");
         int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16] - 30);
         int treeXPosition = xPositionVal;
-        if(treeImage != null)app.image(treeImage,treeXPosition,treeheight, 32,32);
+        if(treeImage != null)app.image(treeImage,treeXPosition,treeheight, treeDisplayDimensions,treeDisplayDimensions);
+
         // app.stroke(0,0,0);
         // app.fill(0,0,0);
         // app.rect(treeXPosition,treeheight, 31, 32);
@@ -46,9 +71,15 @@ public class Tree {
      * @see Terrain#drawTerraingraphics 
      */
     public void draw(PGraphics app){
-        int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16] - 30);
-        int treeXPosition = xPositionVal;
-        if(treeImage != null)app.image(treeImage,treeXPosition,treeheight, 32,32);
+        //int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16] - 30);
+        int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16]-30);
+        if(treeImage != null)app.image(treeImage,this.xPositionVal,treeheight, 32,32);
+
+        // app.stroke(0,0,0);
+        // app.fill(0,0,0);
+        // app.line(this.xPositionVal,treeheight,(this.xPositionVal),(treeheight-30));
+        // app.rect(treeXPosition,treeheight, 31, 32);
+
     }
 
     /**

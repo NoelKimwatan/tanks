@@ -141,6 +141,7 @@ public class Terrain {
         terrainGraphics.image(App.getBackgroundImage(), 0, 0);
         terrainGraphics.stroke(App.getForeGroundColor()[0], App.getForeGroundColor()[1], App.getForeGroundColor()[2]);
 
+
         for(int i = 0; i < terrainMovingAverageHeight.length; i++){
             terrainGraphics.line(i,terrainMovingAverageHeight[i],i,App.HEIGHT);
         }

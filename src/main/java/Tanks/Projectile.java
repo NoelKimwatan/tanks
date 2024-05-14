@@ -16,6 +16,7 @@ public class Projectile implements Coordinates {
     private boolean delete = false;
     private int craterRadius = 30;
     private int projectileRadius = 10;
+    private boolean isLargerProjectile;
     
     private int projectileEffectRadius = 30;
     private final int maxProjectileDamage = 60;
@@ -42,6 +43,7 @@ public class Projectile implements Coordinates {
 
         this.terrain = terrain;
         this.sourceTank = tank;
+        this.isLargerProjectile = largerProjectile;
         //this.largerProjectile = largerProjectile;
 
         if(largerProjectile){
@@ -55,7 +57,7 @@ public class Projectile implements Coordinates {
 
         projectileXVelocity = projectileVelocity * (float)Math.sin(turrentAngle);
         projectileYVelocity = projectileVelocity * (float)Math.cos(turrentAngle);
-        System.out.println("Projectile velocity: " + projectileVelocity + " Projectile x velocity: "+ projectileXVelocity + " Projectile Y velocity: "+projectileYVelocity);
+        //System.out.println("Projectile velocity: " + projectileVelocity + " Projectile x velocity: "+ projectileXVelocity + " Projectile Y velocity: "+projectileYVelocity);
     }
 
     /**
@@ -129,13 +131,21 @@ public class Projectile implements Coordinates {
     }
 
     /**
+     * A getter method to get whether the projectile is a largerProjectile
+     * @return A boolean to represent 
+     */
+    public boolean isLargerProjectile(){
+        return this.isLargerProjectile;
+    }
+
+    /**
      * A method used to calculate the damaged of Tank given its proximity to the projectiles Impact point
      * @param xImpactPoint The X-axis Impact point
      * @param yImpactpoint The Y-axis Impact point
      */
     public void calculateTankDamage(float xImpactPoint, float yImpactpoint){
         for(Tank tank : App.getAliveTanks()){
-            System.out.println("Checking tank hit: "+tank.playerCharacter());
+            //System.out.println("Checking tank hit: "+tank.playerCharacter());
 
 
             //getTanksEdges(){
@@ -241,7 +251,7 @@ public class Projectile implements Coordinates {
      * @param yImpactPoint The Y-axis impact point
      */
     public void projectileImpact(double xImpactPoint, double yImpactPoint){
-        System.out.println("Projectile Impact");
+        //System.out.println("Projectile Impact");
         this.delete = true;
         Explosion projectileExplossion = new Explosion( (double)this.getXPosition(), (double)this.getYPosition(), (double)projectileEffectRadius );
         App.addExplosion(projectileExplossion);
@@ -258,10 +268,10 @@ public class Projectile implements Coordinates {
             //XLeft, XRight, YTop
             
             if(tank.getTanksEdges()[0] < this.getXPosition() && tank.getTanksEdges()[1] > this.getXPosition() && tank.getYPosition() > this.getYPosition() && tank.getTanksEdges()[2] < this.getYPosition()){ 
-                System.out.println("Is Tanks Direct Hit. Direct hit Func Func Function");
-                System.out.println("Current projectile position: ("+this.getXPosition()+","+this.getYPosition()+")");
-                System.out.println("Current tank position: ("+tank.getXPosition()+","+tank.getYPosition()+")");
-                System.out.println("Tank edges: Left:"+tank.getTanksEdges()[0]+" Right: "+tank.getTanksEdges()[1]+" Top: "+tank.getTanksEdges()[2]+" Bottom: "+tank.getYPosition());
+                //System.out.println("Is Tanks Direct Hit. Direct hit Func Func Function");
+                //System.out.println("Current projectile position: ("+this.getXPosition()+","+this.getYPosition()+")");
+                //System.out.println("Current tank position: ("+tank.getXPosition()+","+tank.getYPosition()+")");
+                //System.out.println("Tank edges: Left:"+tank.getTanksEdges()[0]+" Right: "+tank.getTanksEdges()[1]+" Top: "+tank.getTanksEdges()[2]+" Bottom: "+tank.getYPosition());
                 return true;
             }
         }   
@@ -287,7 +297,7 @@ public class Projectile implements Coordinates {
             boolean directHit = checkDirectHit();
 
             if(directHit){
-                System.out.println("Tank direct hit. Direct Hit function");
+                //System.out.println("Tank direct hit. Direct Hit function");
                 projectileImpact((double)this.getXPosition(),(double)this.getYPosition());
                 deformTerrain(this.getXPosition(),this.getYPosition());
                 calculateTankDamage((float)this.getXPosition(),(float)this.getYPosition());

@@ -114,7 +114,7 @@ public class Text {
 
 
         //Draw current player
-        if(displayArrowCounter > 0){
+        if(displayArrowCounter > 0 && !App.isGameover()){
             //System.out.println("Display arrow");
             app.stroke(0, 0, 0);
             app.line((float)(this.currentPlayer.getXPosition()),(float)(this.currentPlayer.getYPosition() -80), (float)(this.currentPlayer.getXPosition()), (float)(this.currentPlayer.getYPosition() -180));

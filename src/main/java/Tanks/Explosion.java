@@ -26,7 +26,7 @@ public class Explosion implements Coordinates{
         this.setYPosition(y);
         this.explosionRadius = 0;
         this.explosionMaxRadiud = maxRadius;
-        System.out.println("New explossion created. Radius"+maxRadius);
+        //System.out.println("New explossion created. Radius"+maxRadius);
     }
 
     /**
@@ -81,7 +81,7 @@ public class Explosion implements Coordinates{
         if(explosionRadius <= explosionMaxRadiud){
             explosionRadius += 5;
         }else{
-            System.out.println("Explossion is deleted");
+            //System.out.println("Explossion is deleted");
             this.delete = true;
         }
     }
