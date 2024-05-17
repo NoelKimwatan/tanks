@@ -7,14 +7,11 @@ public class Tank implements Coordinates {
     public static final double TANKBOTTOMWIDTH = 32;
     public static final double TANKSHEIGHT = 16;
     public static final double TANKSTOPWIDTH = 28;
-
     private double xPositionVal;
     private double yPositionVal;
-
     private double tanksXLeftEdge;
     private double tanksXRightEdge;
     private double tanksYTopEdge;
-
     private int fuelLevel; 
     private int health;
     private double power; 
@@ -27,25 +24,18 @@ public class Tank implements Coordinates {
     private int parachuteNo;
     private int pixelsDropped = 0;
     private boolean largerProjectile = false;
-
     private boolean tankFalling = false;
     private double tankFallingSpeed;
-
-
     private int direction = 0;
     private int turrentPowerDirection = 0; //-1 Decrease power, +1 Increase power
     private double turrentPowerChange = 1.2;  // Change per frame (36/30)
-
     private double tanksTurrentXStart;
     private double tanksTurrentYStart;
     private double tanksTurrentXEnd;
     private double tanksTurrentYEnd;
     private double tanksTurrentWidth = 5;
     private double tanksTurrentLength = 15;
-
     private double tanksSideCurves = 5;
-
-    //Turrents angle
     private double turrentAngle = 0;
     private int turretDirection = 0;
 

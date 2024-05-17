@@ -53,8 +53,7 @@ public class App extends PApplet {
     private static int levelNo = 0;
     private static boolean newGame = true;
 
-    //To remove
-    public Clock clock = Clock.systemDefaultZone();
+
 
     
     
@@ -429,6 +428,7 @@ public class App extends PApplet {
                 // gameOver = false;
                 // App.hPlayerSortedLetters = new ArrayList<Character>(); 
                 // setup();
+                //Resets game after game is over an 'r' is pressed
                 this.resetGame();
             }
         }
@@ -513,11 +513,18 @@ public class App extends PApplet {
     }
 
 
-
+    /**
+     * This method adds a projectile to the projectile Queue
+     * @param projectile The projectile to add to the Queue
+     */
     public static void addProjectile(Projectile projectile){
         App.projectileQueue.add(projectile);
     }
 
+    /**
+     * This method adds an Explossion to the explossion Queue
+     * @param explossion The explossion to add to the Queue
+     */
     public static void addExplosion(Explosion explossion){
         App.explossionQueue.add(explossion);
     }
@@ -589,7 +596,7 @@ public class App extends PApplet {
     }
 
     /**
-     * Draw all elements in the game by current frame.
+     * This method draws all elements in the game by current frame.
      */
 	@Override
     public void draw() {
