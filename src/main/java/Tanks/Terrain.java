@@ -11,17 +11,16 @@ import processing.core.PGraphics;
  */
 public class Terrain {
 
-    public int[] terrainHeights;
-    public int[] terrainMovingAverageHeight;
+    private int[] terrainHeights;
+    private int[] terrainMovingAverageHeight;
     private int movingAverageNo = 32;
     private ArrayList<Integer> treePositions ;
     private static HashMap<Integer,Character> hPlayerPos;
     private static HashMap<Integer,Character> AIPlayerPos;
-    public ArrayList<Tree> trees = new ArrayList<Tree>();
-    PGraphics terrainGraphics;
-    public int windMagnitude;
-
-    public App app;
+    private ArrayList<Tree> trees = new ArrayList<Tree>();
+    private PGraphics terrainGraphics;
+    private int windMagnitude;
+    private App app;
 
 
     /**
@@ -57,6 +56,7 @@ public class Terrain {
 
         terrainMovingAverageHeight = getHeightPartitions(terrainHeights);
         windMagnitude = (int) ((Math.random() * ((35.0 + 35.0 + 1.0)) - 35.0));
+
     }
 
     /**
@@ -73,6 +73,38 @@ public class Terrain {
 
         return terrainHeights;
     } 
+
+    /**
+     * A Getter method to obtain the terrains height at a particular X-position
+     * @param xPosition The X-position to obtain the terrains height at
+     */
+    public int getTerrainHeight(int xPosition){
+        return this.terrainMovingAverageHeight[xPosition];
+    }
+
+    /**
+     * A Setter method to set the terrains height at a given X-position
+     * @param xPosition The X-position to set the terrain's height at
+     * @param height The height to set the xPosition terrains height to
+     */
+    public void setTerrainHeight(int xPosition, int height){
+        this.terrainMovingAverageHeight[xPosition] = height;
+    }
+
+    /**
+     * A getter method to obtain the wind magnitude
+     * @return The wing magnitude as an integer
+     */
+    public int getWindMagnitude(){
+        return windMagnitude;
+    }
+
+    /**
+     * The change wind function, is used to change the windMagnitude value by + or - 5 unit values
+     */
+    public void changeWind(){
+        windMagnitude += (int) ((Math.random() * ((5.0 + 5.0 + 1.0)) - 5.0));
+    }   
 
     /**
      * The setup function sets up the terrain by performing the moving average function and placing the players and trees. 
@@ -94,7 +126,9 @@ public class Terrain {
             //App.hPlayerSortedLetters = new ArrayList<Character>();
             //App.alivePlayers = new ArrayList<Character>();
             for(int i: hPlayerPos.keySet()){
-                Tank tank = new Tank(i, this, hPlayerPos.get(i), App.playerColours.get(String.valueOf(hPlayerPos.get(i))));
+                //getPlayerColours
+                //Tank tank = new Tank(i, this, hPlayerPos.get(i), App.playerColours.get(String.valueOf(hPlayerPos.get(i))));
+                Tank tank = new Tank(i, this, hPlayerPos.get(i), App.getPlayerColours().get(String.valueOf(hPlayerPos.get(i))));
                 App.addTank(hPlayerPos.get(i), tank);
                 //App.alivePlayers.add(tank.playerCharacter());
                 //App.hPlayerSortedLetters.add(tank.playerCharacter());
@@ -102,14 +136,15 @@ public class Terrain {
             //App.hPlayerSortedLetters.sort(Comparator.naturalOrder());
         }else{
             System.out.println("Next level");
+            resetTanks();
             //System.out.println("Number of alive players before: "+App.alivePlayers.size());
             //App.alivePlayers.clear();
             //System.out.println("Number of alive players after: "+App.alivePlayers.size());
-            for(int i: hPlayerPos.keySet()){
-                Tank tank = App.getTank(hPlayerPos.get(i));
-                tank.resetTank(i,this);
-                //App.alivePlayers.add(tank.playerCharacter());
-            }
+            // for(int i: hPlayerPos.keySet()){
+            //     Tank tank = App.getTank(hPlayerPos.get(i));
+            //     tank.resetTank(i,this);
+            //     //App.alivePlayers.add(tank.playerCharacter());
+            // }
             //System.out.println("Number of alive players after after: "+App.alivePlayers.size());
 
         }
@@ -121,11 +156,17 @@ public class Terrain {
     }
 
     /**
-     * The change wind function, is used to change the windMagnitude value by + or - 5 unit values
+     * Method to reset Tanks on the terrain
      */
-    public void changeWind(){
-        windMagnitude += (int) ((Math.random() * ((5.0 + 5.0 + 1.0)) - 5.0));
-    }    
+    public void resetTanks(){
+        for(int i: hPlayerPos.keySet()){
+            Tank tank = App.getTank(hPlayerPos.get(i));
+            tank.resetTank(i,this);
+            //App.alivePlayers.add(tank.playerCharacter());
+        }
+    }
+
+ 
 
     /**
      * This function is used to draw the terrain graphics. Everytime the function is called a new terrain image is created

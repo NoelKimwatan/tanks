@@ -4,6 +4,10 @@ package Tanks;
  * The Tank class represents a Tank on the terrain. 
  */
 public class Tank implements Coordinates {
+    public static final double TANKBOTTOMWIDTH = 32;
+    public static final double TANKSHEIGHT = 16;
+    public static final double TANKSTOPWIDTH = 28;
+
     private double xPositionVal;
     private double yPositionVal;
 
@@ -39,9 +43,6 @@ public class Tank implements Coordinates {
     private double tanksTurrentWidth = 5;
     private double tanksTurrentLength = 15;
 
-    public static final double tanksBottonWidth = 32;
-    public static final double tanksHeight = 16;
-    public static final double tanksTopWidth = 28;
     private double tanksSideCurves = 5;
 
     //Turrents angle
@@ -63,10 +64,11 @@ public class Tank implements Coordinates {
         this.t = t;
         this.parachuteNo = 3;
         //this.xPositionVal = initialXPosition * 32;
-        //System.out.println("Initial X position: "+initialXPosition);
+        //System.out.println("Initial X position: "+initialXPosition); (int)this.getXPosition()
 
         this.setXPosition(((initialXPosition * 32) + 16));
-        this.setYPosition(t.terrainMovingAverageHeight[(int)xPositionVal]);
+        //this.setYPosition(t.terrainMovingAverageHeight[(int)xPositionVal]);
+        this.setYPosition(t.getTerrainHeight((int)xPositionVal));
 
         this.player = player;
 
@@ -107,8 +109,8 @@ public class Tank implements Coordinates {
         }
 
         //Set Turrets X-Position
-        this.tanksXLeftEdge = this.xPositionVal - (Tank.tanksBottonWidth/2);
-        this.tanksXRightEdge = this.xPositionVal + (Tank.tanksBottonWidth/2);
+        this.tanksXLeftEdge = this.xPositionVal - (Tank.TANKBOTTOMWIDTH/2);
+        this.tanksXRightEdge = this.xPositionVal + (Tank.TANKBOTTOMWIDTH/2);
     }
 
     /**
@@ -127,11 +129,11 @@ public class Tank implements Coordinates {
         this.yPositionVal = yValue;
 
         //Set Turret Y Position
-        tanksYTopEdge = this.yPositionVal - (Tank.tanksHeight);
+        tanksYTopEdge = this.yPositionVal - (Tank.TANKSHEIGHT);
 
         //Check if Tank Below Map
         if(this.getYPosition() > App.HEIGHT){
-            System.out.println("Tank: Tank is below map");
+            //System.out.println("Tank: Tank is below map");
             tankBelowMap();
         }
     }
@@ -150,7 +152,8 @@ public class Tank implements Coordinates {
      */
     public double[] getTanksEdges(){
         //XLeft, XRight, YTop
-        return new double[]{this.tanksXLeftEdge,this.tanksXRightEdge, this.tanksYTopEdge, this.yPositionVal};
+        //getTanksEdges
+        return new double[]{this.tanksXLeftEdge,this.tanksXRightEdge, this.tanksYTopEdge};
     }
 
     /**
@@ -200,13 +203,7 @@ public class Tank implements Coordinates {
         return this.player;
     }
 
-    /**
-     * A getter method to obtain a Tanks health
-     * @return A Tanks health
-     */
-    public int getTankHealth(){
-        return this.health;
-    }
+
 
     /**
      * A getter method to obtain a Tanks fuel level
@@ -253,7 +250,7 @@ public class Tank implements Coordinates {
     /**
      * This function checks to ensure that a Tanks power does not exceed its health. It is executed everytime the health changes
      */
-    public void checkTanksPower(){
+    private void checkTanksPower(){
         if(this.getTankPower() > this.getTankHealth()){
             this.setTankPower(this.getTankPower());
         }
@@ -317,9 +314,10 @@ public class Tank implements Coordinates {
     public void resetTank(int newXPosition, Terrain t){
         //System.out.println("Resetting tank: "+player);
         // this.xPositionVal = (newXPosition * 32) + 16;
-        // this.yPositionVal = t.terrainMovingAverageHeight[(int)xPositionVal];
+        // this.yPositionVal = t.terrainMovingAverageHeight[(int)xPositionVal];getTerrainHeight
         this.setXPosition((newXPosition * 32) + 16);
-        this.setYPosition(t.terrainMovingAverageHeight[(int)xPositionVal]);
+        //this.setYPosition(t.terrainMovingAverageHeight[(int)xPositionVal]);
+        this.setYPosition(t.getTerrainHeight((int)xPositionVal));
         this.t = t;
         this.fuelLevel = 250;
         this.power = 50;
@@ -346,7 +344,7 @@ public class Tank implements Coordinates {
         if(code == 80 && this.score >= 15){
             this.parachuteNo += 1;
             this.score -= 15;
-        }else if (code == 82 && this.score >= 20){
+        }else if (code == 82 && this.score >= 20 && this.health < 100){
             //Code 82 is for r. Repair cost 20
             setHealth(+20);
             this.score -= 20;
@@ -365,19 +363,40 @@ public class Tank implements Coordinates {
      * This function handles cases when the Tank is below the Map. It resets the position, inititates an explossion and sets the Tank as deleted
      */
     public void tankBelowMap(){
-        this.setYPosition(640);
-        //yPositionVal = 640;
-        tankFalling = false;
-        tankFallingSpeed = 0;
-        direction = 0;
-        this.deleted = true;
+
+
+        this.setYPosition(App.HEIGHT);
+        this.setIsTankFalling(false);
+
+        // this.setYPosition(640);
+        // //yPositionVal = 640;
+        // //tankFalling = false;
+        // this.setIsTankFalling(false);
+        // direction = 0;
+        // //this.deleted = true;
 
         
-        //Explosion tankExplosion = new Explosion(this.xPositionVal,640, 30);
-        Explosion tankExplosion = new Explosion(this.getXPosition(),640, 30);
-        App.addExplosion(tankExplosion);
+
+        // if(this.istankFalling()){
+        //     this.setIsTankFalling(false);
+        //     //System.out.println("Tank was falling and went below map");
+        // }else{
+        //     this.setHealth(-100);
+        // }
+
+        
+        // //Explosion tankExplosion = new Explosion(this.xPositionVal,640, 30);
+        // Explosion tankExplosion = new Explosion(this.getXPosition(),640, 30);
+        // App.addExplosion(tankExplosion);
     }
 
+    /**
+     * A getter method to obtain a Tanks health
+     * @return A Tanks health
+     */
+    public int getTankHealth(){
+        return this.health;
+    }
 
     /**
      * This is the setter method used to set the Tanks health
@@ -387,17 +406,26 @@ public class Tank implements Coordinates {
      */
     public int setHealth(int change){
         int healthChange = 0;
-        //Only set health for a none deleted Tank
-        if(this.deleted == false){
+        //Only set health for a none deleted Tank isNotActive
+        //if(this.deleted == false){
+        if(this.isNotActive() == false){
             if((this.health + change) <= 0){
                 healthChange = this.health;
                 this.health = 0;
-                this.deleted = true;
-                this.tankFalling = false;
-                this.deleted = true;
+
+                //this.tankFalling = false;
+                //this.setIsTankFalling(false);
+                
                 //Explosion tankExplosion = new Explosion(this.xPositionVal,t.terrainMovingAverageHeight[(int)this.xPositionVal], 15);
-                Explosion tankExplosion = new Explosion(this.getXPosition(),t.terrainMovingAverageHeight[(int)this.getXPosition()], 15);
-                App.addExplosion(tankExplosion);
+                
+
+                //If tank is NOT falling
+                if(!this.istankFalling()){
+                    this.createTankExplossion(15);
+                }else{
+                    System.out.println("Tank: Tank falling so explossion postponned");
+                }
+
                 
             }else if((this.health + change) >= 100){
                 this.health = 100;
@@ -414,17 +442,46 @@ public class Tank implements Coordinates {
     }
 
     /**
+     * This function creates a Tank explossion
+     */
+    public void createTankExplossion(int explossionRadius){
+        double xExplossionSource = this.getXPosition();
+        double yExplossionSource = t.getTerrainHeight((int)this.getXPosition()); //getTerrainHeight
+        //double yExplossionSource = t.terrainMovingAverageHeight[(int)this.getXPosition()]; //getTerrainHeight
+
+        // if(xExplossionSource < 0){
+        //     xExplossionSource = 0;
+        // }else if (xExplossionSource > App.WIDTH){
+        //     xExplossionSource = App.WIDTH;
+        // }
+
+        if(yExplossionSource < 0){
+            yExplossionSource = 0;
+        }else if (yExplossionSource > App.HEIGHT){
+            yExplossionSource = App.HEIGHT;
+        }
+
+        this.deleted = true;
+        Explosion tankExplosion = new Explosion(xExplossionSource,yExplossionSource,explossionRadius);
+        App.addExplosion(tankExplosion);
+    }
+
+    /**
      * This function handles the damage inflicted on a Tank either by falling or by a projectile. It also handles the score earned 
      * @param damage This is the damage or health decrease. This is a positive integer value
      * @param projectile This is the projectile that has caused the damage or health decrease
      */
     public void tankDamage(int damage, Projectile projectile ){
+        //System.out.print("Tank: Tank damaged: "+player+" Damage amount: "+damage+" Health before: this: "+this.getTankHealth()+ "Health After: ");
         int scoreEarned = Math.abs(setHealth(-damage));
-        //System.out.println("Tank damaged: "+player+" Damage amount: "+damage);
-
+       //System.out.println(this.getTankHealth());
+        
+        //System.out.print("Damage from: "+projectile.getSourceTank().playerCharacter()+" Score before: "+projectile.getSourceTank().score);
         if(projectile.getSourceTank() != this){
             projectile.getSourceTank().score += scoreEarned;
         }
+        //System.out.println(" Score after: "+projectile.getSourceTank().score);
+
     }
 
     /**
@@ -435,6 +492,50 @@ public class Tank implements Coordinates {
         return tankFalling;
 
     }
+
+    /**
+     * Setter method to set if the Tank is falling
+     * @param isTankFalling A boolean to set whether a Tank is falling or not. This function is used when setting the value to false
+     */
+    public void setIsTankFalling(boolean isTankFalling){
+        //System.out.println("Tank "+this.player+" falling. Health: "+this.getTankHealth()+" Deleted: "+this.isNotActive()+" Position:("+this.getXPosition()+","+this.getYPosition()+")");
+
+        if(!isTankFalling && this.getTankHealth() == 0 && !this.isNotActive()){
+            this.createTankExplossion(15);
+        }else if(!isTankFalling && this.getTankHealth() > 0 && !this.isNotActive() && this.getYPosition() >= App.HEIGHT){
+            //Tank bellow Terrain
+            //System.out.println("Tank "+this.player+" falling and explossing since below terrain");
+
+            //Tank explossion to be 30 since Tank has gone below terrain
+            this.createTankExplossion(30);
+        }
+
+        if(!isTankFalling){
+            setTankFallingSpeed(0);
+        }
+
+        this.tankFalling = isTankFalling;
+    }
+
+    /**
+     * Getter method to get Tank's falling speed
+     * @return The Tanks falling speed
+     */
+    public double getTankFallingSpeed(){
+        return tankFallingSpeed;
+    }
+
+    /**
+     * A Setter method to set the Tank's falling speed
+     * @param fallingSpeed The Tanks falling speed
+     */
+    public void setTankFallingSpeed(double fallingSpeed){
+        this.tankFallingSpeed = fallingSpeed;
+    }
+
+
+
+
 
 
     /**
@@ -473,8 +574,9 @@ public class Tank implements Coordinates {
             this.setTankFuelLevel(fuelLevel - speed);
             //yPositionVal = this.t.terrainMovingAverageHeight[(int)xPositionVal];
 
-            //Set Y position
-            setYPosition(this.t.terrainMovingAverageHeight[(int)xPositionVal]);
+            //Set Y position .getTerrainHeight
+            //setYPosition(this.t.terrainMovingAverageHeight[(int)xPositionVal]);
+            setYPosition(this.t.getTerrainHeight((int)xPositionVal));
 
             // //Changing tanks Edges
             // tanksXLeftEdge = this.xPositionVal - (Tank.tanksBottonWidth/2);
@@ -514,6 +616,7 @@ public class Tank implements Coordinates {
         //Change turrets direction
         if(turretDirection != 0 &&  App.currentPlayer() == this){
             //turrentAngle = turrentAngle +  (float)((float)turretDirection / 10);
+            //3 radian per second is equals to 0.1 radians per frame. So +-1/10 equals to +0.1 or -0.1
             this.setTurrentAngle(this.getTurrentAngle() + ((double)turretDirection / 10));
             //System.out.println("turret angle: "+turrentAngle);
         }
@@ -536,22 +639,29 @@ public class Tank implements Coordinates {
         }
 
         //Check if tank falling 
-        if(tankFalling){
-            this.setYPosition(this.getYPosition() + tankFallingSpeed);
+        if(this.istankFalling()){
+            System.out.println("Tank falling loop");
+            System.out.println("Tank falling speed: "+getTankFallingSpeed());
+            this.setYPosition(this.getYPosition() + getTankFallingSpeed());
+
             //this.yPositionVal += tankFallingSpeed;
-            //if (this.getYPosition() >= t.terrainMovingAverageHeight[(int)this.xPositionVal]){
-            if (this.getYPosition() >= t.terrainMovingAverageHeight[(int)this.getXPosition()]){
-                tankFalling = false;
-                tankFallingSpeed = 0;
+            //if (this.getYPosition() >= t.terrainMovingAverageHeight[(int)this.xPositionVal]){ getTerrainHeight
+            //if (this.getYPosition() >= t.terrainMovingAverageHeight[(int)this.getXPosition()]){    
+            if (this.getYPosition() >= t.getTerrainHeight((int)this.getXPosition())){
+                //tankFalling = false;
+
+                this.setIsTankFalling(false);
                 //this.yPositionVal = t.terrainMovingAverageHeight[(int)this.xPositionVal];
-                this.setYPosition(t.terrainMovingAverageHeight[(int)this.getXPosition()]);
+                //this.setYPosition(t.terrainMovingAverageHeight[(int)this.getXPosition()]);
+                this.setYPosition(t.getTerrainHeight((int)this.getXPosition()));
             }
             // if(yPositionVal > 640){
             //     tankBelowMap();
             // }
-            if(this.getYPosition() > 640){
-                tankBelowMap();
-            }
+            // if(this.getYPosition() >= App.HEIGHT){
+            //     //this.setIsTankFalling(false);
+            //     tankBelowMap();
+            // }
 
             if(this.direction != 0){
                 //Set tank cant move
@@ -572,7 +682,7 @@ public class Tank implements Coordinates {
         // tanksTurrentXStart = (xPositionVal);
         // tanksTurrentYStart = yPositionVal - (Tank.tanksHeight);
         tanksTurrentXStart = (this.getXPosition());
-        tanksTurrentYStart = this.getYPosition() - (Tank.tanksHeight);
+        tanksTurrentYStart = this.getYPosition() - (Tank.TANKSHEIGHT);
 
         tanksTurrentXEnd = tanksTurrentXStart + tanksTurrentLength * (float) Math.sin(turrentAngle);
         tanksTurrentYEnd = tanksTurrentYStart - tanksTurrentLength * (float) Math.cos(turrentAngle);
@@ -606,26 +716,43 @@ public class Tank implements Coordinates {
      * @param projectileHit The projectile that has caused the terrain to deform
      */
     public void checkTankFalling(Projectile projectileHit){
+        System.out.println("Checking if tank is falling");
         //Check if tank is floating
-        //if(this.t.terrainMovingAverageHeight[(int)this.xPositionVal] > yPositionVal && this.tankFalling == false){
-        if(this.t.terrainMovingAverageHeight[(int)this.getXPosition()] > getYPosition() && this.tankFalling == false){
-            //System.out.println("Tank is floating");
+        //if(this.t.terrainMovingAverageHeight[(int)this.xPositionVal] > yPositionVal && this.tankFalling == false){ getTerrainHeight
+        //if(this.t.terrainMovingAverageHeight[(int)this.getXPosition()] > getYPosition() && this.istankFalling() == false){    
+        if(this.t.getTerrainHeight((int)this.getXPosition()) > getYPosition() && this.istankFalling() == false){
+            System.out.println("Tank is floating");
             this.move(0);
-            this.tankFalling = true;
 
-            if(parachuteNo >= 1){
+            //System.out.println("checkTankFalling: Tank health: "+this.getTankHealth());
+            
+
+            if(this.getParachuteNo() >= 1){
                 //Falling speed 120 pixels per second with no parachutes and 60 with parachutes
                 // 120/30 == 4      60/30 = 2
                 //No damage
-                tankFallingSpeed = 2;
-                parachuteNo -= 1;
+                //tankFallingSpeed = 2;
+                setTankFallingSpeed(2);
+                this.setParachuteNo(this.getParachuteNo() - 1);
+                System.out.println("Tank: Tank: "+playerCharacter()+" Falling but with Parachute");
+                this.setIsTankFalling(true);
+                //parachuteNo -= 1;
             }else{
-                tankFallingSpeed = 4;
+                //tankFallingSpeed = 4;
+                setTankFallingSpeed(4);
                 //getYPosition
-                //pixelsDropped = Math.abs(t.terrainMovingAverageHeight[(int)this.xPositionVal] - (int)this.yPositionVal);
-                pixelsDropped = Math.abs(t.terrainMovingAverageHeight[(int)this.getXPosition()] - (int)this.getYPosition());
+                //pixelsDropped = Math.abs(t.terrainMovingAverageHeight[(int)this.xPositionVal] - (int)this.yPositionVal); getTerrainHeight
+                //pixelsDropped = Math.abs(t.terrainMovingAverageHeight[(int)this.getXPosition()] - (int)this.getYPosition());
+                pixelsDropped = Math.abs(t.getTerrainHeight((int)this.getXPosition()) - (int)this.getYPosition());
+                System.out.println("Tank damage to Tank: "+this.playerCharacter()+" from falling: "+pixelsDropped+" Source Tank: "+projectileHit.getSourceTank().playerCharacter());
+                this.setIsTankFalling(true);
                 tankDamage(pixelsDropped, projectileHit);
             }
+
+            //Set tank falling after decreasing parachutes
+            //this.tankFalling = true;
+            //this.setIsTankFalling(true);
+            
         }
     }
 
@@ -675,8 +802,9 @@ public class Tank implements Coordinates {
         //System.out.println("Tank: In draw method");
         this.refresh();
 
-        //Drawing parachute
-        if(tankFalling){
+        //Drawing parachute this.setIsTankFalling(false);
+        //if(tankFalling && this.getParachuteNo() > 0){
+        if(this.istankFalling() && this.getTankFallingSpeed() == 2){
             //getYPosition
             //app.image(App.getParachuteImage(),(float)xPositionVal-48,(float)yPositionVal,96,-96); 
             app.image(App.getParachuteImage(),(float)getXPosition()-48,(float)getYPosition(),96,-96); 
@@ -685,8 +813,8 @@ public class Tank implements Coordinates {
         //Drawing tank
         app.stroke(0,0,0);
         app.fill(colour[0],colour[1],colour[2]);
-        app.rect((float)(xPositionVal - tanksBottonWidth/2),(float)yPositionVal, (float)tanksBottonWidth, (float)-(tanksHeight/2), (float)tanksSideCurves, (float)tanksSideCurves, (float)tanksSideCurves, (float)tanksSideCurves);
-        app.rect((float)((xPositionVal - tanksBottonWidth/2) + (tanksBottonWidth - tanksTopWidth)/2),(float)(yPositionVal - (tanksHeight/2)), (float)tanksTopWidth, (float)-(tanksHeight/2), (float)tanksSideCurves, (float)tanksSideCurves, 0, 0);
+        app.rect((float)(xPositionVal - TANKBOTTOMWIDTH/2),(float)yPositionVal, (float)TANKBOTTOMWIDTH, (float)-(TANKSHEIGHT/2), (float)tanksSideCurves, (float)tanksSideCurves, (float)tanksSideCurves, (float)tanksSideCurves);
+        app.rect((float)((xPositionVal - TANKBOTTOMWIDTH/2) + (TANKBOTTOMWIDTH - TANKSTOPWIDTH)/2),(float)(yPositionVal - (TANKSHEIGHT/2)), (float)TANKSTOPWIDTH, (float)-(TANKSHEIGHT/2), (float)tanksSideCurves, (float)tanksSideCurves, 0, 0);
         
         //Drawing turret
         app.stroke(0,0,0);
@@ -698,7 +826,32 @@ public class Tank implements Coordinates {
         app.stroke(0,0,0);
         app.noFill();
 
-        app.rect((float)(xPositionVal - tanksBottonWidth/2),(float)yPositionVal,(float)tanksBottonWidth,-16);
+        app.rect((float)(xPositionVal - TANKBOTTOMWIDTH/2),(float)yPositionVal,(float)TANKBOTTOMWIDTH,-16);
+
+        
+        // private double tanksXLeftEdge;
+        // private double tanksXRightEdge;
+        // private double tanksYTopEdge;
+
+        if( (this.getXPosition() - (Tank.TANKBOTTOMWIDTH/2)) != this.tanksXLeftEdge){
+            System.out.println("Player: "+player);
+            System.out.println("Something wrong with tanksXLeftEdge");
+        }
+
+        if( (this.getXPosition() + (Tank.TANKBOTTOMWIDTH/2)) != this.tanksXRightEdge){
+            System.out.println("Player: "+player);
+            System.out.println("Something wrong with tanksXRightEdge");
+        }
+
+        if( (this.getYPosition() - Tank.TANKSHEIGHT) != tanksYTopEdge){
+            System.out.println("Player: "+player);
+            System.out.println("Something wrong with tanksYTopEdge");
+        }
+
+        // //Set Turrets X-Position
+        // this.tanksXLeftEdge = this.xPositionVal - (Tank.tanksBottonWidth/2);
+        // this.tanksXRightEdge = this.xPositionVal + (Tank.tanksBottonWidth/2);
+        // tanksYTopEdge = this.yPositionVal - (Tank.tanksHeight);
     }
 
     /**
@@ -706,7 +859,9 @@ public class Tank implements Coordinates {
      */
     @Override
     public String toString(){
-        return "Current position: ("+ this.xPositionVal+","+this.yPositionVal+") " + " Fuel: "+ fuelLevel;
+        //return "Current position: ("+ this.xPositionVal+","+this.yPositionVal+") " + " Fuel: "+ fuelLevel;
+        return "Tank: "+this.playerCharacter()+" ("+this.getXPosition()+","+this.getYPosition()+") LeftX Edge"+tanksXLeftEdge+" Right X Edge"+tanksXRightEdge+" Top Edge "+tanksYTopEdge;
     }
+
     
 }

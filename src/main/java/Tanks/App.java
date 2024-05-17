@@ -68,11 +68,11 @@ public class App extends PApplet {
     private static ArrayList<Explosion> explossionQueue = new ArrayList<Explosion>();
 
     private static Text textObject;
-    private static  int currentPlayerNo = 0;
-    private static  Tank currentPlayer;
+    private static int currentPlayerNo = 0;
+    private static Tank currentPlayer;
     
 
-    public static JSONObject playerColours;
+    private static JSONObject playerColours;
 
 	
 
@@ -165,7 +165,7 @@ public class App extends PApplet {
 
         //Reset variables if its a new game
         if(App.isNewGame()){
-            System.out.println("App: This is a new game");
+            //System.out.println("App: This is a new game");
             hPlayerSortedLetters = new ArrayList<Character>();
             tanks = new HashMap<Character,Tank>();
             alivePlayers = new ArrayList<Character>();
@@ -177,18 +177,26 @@ public class App extends PApplet {
 
         gameTerraine.draw(this);
 
-        //Sort Alive players once added
-        alivePlayers.sort(Comparator.naturalOrder());
 
 
-        System.out.println("Alive players size: "+alivePlayers.size());
-        System.out.println("hPlayerSortedLetters size: "+hPlayerSortedLetters.size());
+
+        // System.out.println("Alive players size: "+alivePlayers.size());
+        // System.out.println("hPlayerSortedLetters size: "+hPlayerSortedLetters.size());
         
 
-        //Sort players according to Charcter
-        hPlayerSortedLetters.sort(Comparator.naturalOrder());
-        currentPlayer = App.getTank(App.hPlayerSortedLetters.get(0));
+        //Sort all players once added
+        alivePlayers.sort(Comparator.naturalOrder());
+        
+
+        //Sort players list if its a new game
+        if(App.isNewGame()){
+            //System.out.println("App: Is new game hence sort hPlayerSortedLetters");
+            hPlayerSortedLetters.sort(Comparator.naturalOrder());
+        }
         //System.out.println("Current player: "+currentPlayer.playerCharacter());
+
+        currentPlayer = App.getTank(App.hPlayerSortedLetters.get(0));
+        //System.out.println("Current player selected: "+currentPlayer.playerCharacter());
 
 
         //Setup trees
@@ -196,6 +204,21 @@ public class App extends PApplet {
 
         //Setup text
         textObject = new Text(this,gameTerraine);
+    }
+
+    /**
+     * A getter method to get an Apps terrain
+     * @return An Apps Terrain object
+     */
+    public Terrain getTerrain(){
+        return gameTerraine;
+    }
+
+    /**
+     * A getter 
+     */
+    public static JSONObject getPlayerColours(){
+        return App.playerColours;
     }
 
     /**
@@ -273,8 +296,11 @@ public class App extends PApplet {
         tanks.put(c,tank);
         addAlivePlayer(c);
         if(App.isNewGame()){
-            System.out.println("App: Added player: "+c+" To new game and player variable");
-            hPlayerSortedLetters.add(c);
+            //System.out.println("App: Added player: "+c+" To new game and player variable");
+            if(!hPlayerSortedLetters.contains(c)){
+                hPlayerSortedLetters.add(c);
+            }
+            
         }
     }
 
@@ -306,36 +332,38 @@ public class App extends PApplet {
         currentPlayer = currentToSet;
     }
 
-    public static Terrain getGameterrain(){
-        return gameTerraine;
-    }
-
     /**
      * Getter method to get an ArrayList of Alive Tank players
      * @return An array list of Alive Tank players
      */
     public static ArrayList<Tank> getAliveTanks(){
         ArrayList<Tank> aliveTanks = new ArrayList<Tank>();
-        // tanks.forEach((character,tank) -> {
-        //     if(!tank.isNotActive()){
-        //         aliveTanks.add(tank);
-        //     }else{
-        //         if(App.alivePlayers.contains(tank.playerCharacter())){
-        //             App.alivePlayers.remove(tank.playerCharacter()); 
-        //             System.out.println("Tank deleted");
-        //         }    
-        //     }
-        // });
 
-        for(char c : alivePlayers){
-            Tank aliveTank = tanks.get(c);
-            aliveTanks.add(aliveTank);
+        for(Tank tank: tanks.values()){
+            if(!tank.isNotActive()){
+                aliveTanks.add(tank);
+            }else{
+                // if(App.alivePlayers.contains(tank.playerCharacter())){
+                //     App.alivePlayers.remove(tank.playerCharacter()); 
+                //     System.out.println("Tank deleted");
+                // }
+            }
         }
 
         return aliveTanks;
     }
 
 
+    /**
+     * This method is used to reset a game to start afresh
+     */
+    public void resetGame(){
+        levelNo = 0;
+        App.newGame = true;
+        gameOver = false;
+        App.hPlayerSortedLetters = new ArrayList<Character>(); 
+        setup();
+    }
 
 
     /**
@@ -364,8 +392,11 @@ public class App extends PApplet {
             }else if(code == 32){
                 //System.out.println("Spacebar pressed");
                 currentPlayer.fire();
-                currentPlayerNo = currentPlayerNo + 1;
+                // System.out.println("Current player no: "+currentPlayerNo);
+                // currentPlayerNo = currentPlayerNo + 1;
+                // System.out.println("Current player no after: "+currentPlayerNo);
                 gameTerraine.changeWind();
+                this.changeCurrentPlayer();
 
 
                 if(alivePlayers.size() <= 1){
@@ -373,16 +404,7 @@ public class App extends PApplet {
                     changeLevel();
                 }
 
-                while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).isNotActive() == true &&  alivePlayers.size() > 1){
-                    currentPlayerNo = currentPlayerNo + 1;
-                }
-                //System.out.println("Tanks size: "+tanks.size());
-                //System.out.println("Calculations value: "+ (currentPlayerNo % tanks.size()) );
-                //System.out.println("Player letter: "+hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-                currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
-                System.out.println("Current player changed to: "+currentPlayer.playerCharacter());
-                //System.out.println("Current player selected");
-                //Change player
+
 
 
             }else if(code == 87){
@@ -401,12 +423,13 @@ public class App extends PApplet {
             }
         }else{
             if(code == 82){
-                System.out.println("Game reset");
-                levelNo = 0;
-                App.newGame = true;
-                gameOver = false;
-                hPlayerSortedLetters = new ArrayList<Character>(); 
-                setup();
+                //System.out.println("Game reset");
+                // levelNo = 0;
+                // App.newGame = true;
+                // gameOver = false;
+                // App.hPlayerSortedLetters = new ArrayList<Character>(); 
+                // setup();
+                this.resetGame();
             }
         }
 
@@ -462,6 +485,33 @@ public class App extends PApplet {
         App.gameTerraine.draw(this);
     }
 
+    /**
+     * This function changes the current player to the next consecutive player
+     */
+    public void changeCurrentPlayer(){
+        System.out.println("Changing current player");
+        //System.out.print("Player changed from: "+currentPlayer.playerCharacter()+" to: ");
+        currentPlayerNo += 1;
+
+
+        if(getAliveTanks().size() > 1){
+            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).isNotActive() == true &&  getAliveTanks().size() > 1){
+                currentPlayerNo = currentPlayerNo + 1;
+                System.out.println("Selected player is deleted");
+            }
+            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+        }else if(getAliveTanks().size() == 1){
+            currentPlayer = getAliveTanks().get(0);
+
+        }else if(getAliveTanks().size() <= 0){
+            System.out.println("Alive players are 0");
+            changeLevel();
+        }
+
+    
+
+    }
+
 
 
     public static void addProjectile(Projectile projectile){
@@ -479,7 +529,7 @@ public class App extends PApplet {
      */
     public static Projectile getProjectile(int index){
         //projectileQueue.get(i);
-        if (index <= projectileQueue.size()){
+        if (index < projectileQueue.size()){
             return projectileQueue.get(index);
         }else{
             return null;
@@ -494,7 +544,7 @@ public class App extends PApplet {
      */
     public static Explosion getExplossion(int index){
         //projectileQueue.get(i);
-        if (index <= explossionQueue.size()){
+        if (index < explossionQueue.size()){
             return explossionQueue.get(index);
         }else{
             return null;
@@ -509,6 +559,8 @@ public class App extends PApplet {
     private void changeLevel(){
         explossionQueue.clear();
         projectileQueue.clear();
+        currentPlayerNo = 0;
+        changeLevelCounter = 30;
 
         if(levelNo == 2){
             gameOver = true;
@@ -522,13 +574,16 @@ public class App extends PApplet {
             });
         }else{
             System.out.println("Level over");
-            currentPlayerNo = 0;
             levelNo += 1;
             App.newGame = false;
             setup();
         }
     }
 
+    /**
+     * Getter method to obtain a games level
+     * @return The games current level
+     */
     public int getLevel(){
         return levelNo;
     }
@@ -544,12 +599,13 @@ public class App extends PApplet {
         //-------------------------------------------
         //--------Check no of players remaining------
         //-------------------------------------------
-        if(alivePlayers.size() <= 1){
+        if(alivePlayers.size() <= 1 && isGameover() == false){
             //System.out.println("Level over");
             changeLevelCounter -= 1;
+            //System.out.println("Level change counter: "+changeLevelCounter);
 
             if(changeLevelCounter <= 0){
-                changeLevelCounter = 60;
+                //changeLevelCounter = 60;
                 changeLevel();
             }
         }
@@ -559,11 +615,12 @@ public class App extends PApplet {
         //------Check is current player is deleted------
         //----------------------------------------------
         if(currentPlayer.isNotActive() == true){
-            while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).isNotActive() == true && alivePlayers.size() > 1){
-                //System.out.println("Current player is deleted");
-                currentPlayerNo = currentPlayerNo + 1;
-            }
-            currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
+            this.changeCurrentPlayer();
+            // while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).isNotActive() == true && alivePlayers.size() > 1){
+            //     //System.out.println("Current player is deleted");
+            //     currentPlayerNo = currentPlayerNo + 1;
+            // }
+            // currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
         }
 
 
@@ -584,7 +641,7 @@ public class App extends PApplet {
         if(explossionQueue.size() > 0){
             for(int i = 0; i < explossionQueue.size(); i++){
                 Explosion explosonObject = explossionQueue.get(i);
-                if(explosonObject.delete){
+                if(explosonObject.isDeleted()){
                     explossionQueue.remove(i);
                 }else{
                     explosonObject.refresh();
@@ -620,7 +677,7 @@ public class App extends PApplet {
                 //Only refresh if game is not over
                 if (!gameOver)projectile.refresh();
     
-                if(projectile.isActive()){
+                if(projectile.isNotActive()){
                     projectileQueue.remove(i);
                 }else{
                     //System.out.println("Projectile to delete");

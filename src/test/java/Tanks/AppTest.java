@@ -13,21 +13,16 @@ public class AppTest {
 
     @Test
     public void testNewGameInitiation(){
-        System.out.println("App test - Start");
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000);
 
         assertTrue(true);
 
-
         //Game is New
         assertTrue(app.isNewGame());
         assertFalse(app.isGameover());
         assertNotNull(app.currentPlayer());
-
-        //app.exit();
-        
     }
 
     @Test
@@ -36,16 +31,21 @@ public class AppTest {
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000);
 
+
+        app.resetGame();
+        app.delay(5000);
+
         //Test starts at level 0
         System.out.println("Initial level check: "+app.getLevel()); //newGame
-        System.out.println("Is new game: "+App.isNewGame());
+        System.out.println("Is new game: "+app.isNewGame());
 
         int initialLevel = app.getLevel();
+        System.out.println("Initial level check: "+initialLevel); //newGame
 
     
 
         //Remove all players except current player
-        ArrayList<Tank> aliveplayers= App.getAliveTanks()
+        ArrayList<Tank> aliveplayers= app.getAliveTanks()
 ;       for(Tank player : aliveplayers){
             if (player != app.currentPlayer()){
                 player.setHealth(-100);
@@ -59,7 +59,11 @@ public class AppTest {
 
         System.out.println("After level: "+app.getLevel());
         //Test if moved to the next level
-        assertEquals(app.getLevel(),(initialLevel + 1));
+        assertEquals((initialLevel + 1),app.getLevel());
+
+        app.resetGame();
+        app.delay(5000);
+
     }
 
     @Test
@@ -68,7 +72,9 @@ public class AppTest {
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000);
         
-
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
 
         char currentPlayer = App.currentPlayer().playerCharacter();
 
@@ -80,6 +86,7 @@ public class AppTest {
         assertNotSame(currentPlayer, App.currentPlayer().playerCharacter());
         //app.exit();
         //app.delay(100);
+
     }
 
     @Test
@@ -87,6 +94,10 @@ public class AppTest {
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000);
+
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
 
         Tank currentPlayer = App.currentPlayer();
         
@@ -107,12 +118,29 @@ public class AppTest {
         int initialFuelLevel = currentPlayer.getTankFuelLevel();
         //Fuel level will not increase since score is 0
         assertEquals(initialFuelLevel,currentPlayer.getTankFuelLevel());
+
+        //Test back key press
+        double initialPosition = currentPlayer.getXPosition();
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 37));
+        app.delay(100);
+        assertTrue(currentPlayer.getXPosition() < initialPosition);
+
+        //Test back key press
+        double initialTurretAngle = currentPlayer.getTurrentAngle();
+        System.out.println("Initial Turret angle: "+initialTurretAngle);
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 40));
+        app.delay(100);
+        System.out.println("After Turret angle: "+currentPlayer.getTurrentAngle());
+        assertTrue(currentPlayer.getTurrentAngle() < initialPosition);
     }
 
     @Test
     public void testGameOver(){
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(5000);
+
+        app.resetGame();
         app.delay(5000);
 
         ArrayList<Tank> aliveplayers= app.getAliveTanks();
@@ -122,28 +150,61 @@ public class AppTest {
                 if (player != app.currentPlayer()){
                     player.setHealth(-100);
                 }
+                app.delay(100);
+
             }
 
             app.delay(3000); 
 
             if(!app.isGameover()){
+                System.out.println("Game level:"+initialLevel);
                 assertEquals(app.getLevel(),(initialLevel+1));
                 initialLevel += 1;
             }
         }
 
 
-        System.out.println("Level before delay: "+app.getLevel());
         app.delay(5000); 
-        System.out.println("Level after delay: "+app.getLevel());
+
         //Press restart
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 82));
 
-        System.out.println("Level before delay after key press: "+app.getLevel());
+
         app.delay(5000); 
-        System.out.println("Level after delay after key press : "+app.getLevel());
+
         assertEquals(0,app.getLevel());
+
+        app.resetGame();
+        app.delay(5000);
     }
 
+    @Test
+    public void testExplossionQueue(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(5000);
 
+        Terrain terrain = app.getTerrain();
+        Object color = "0,0,0";
+
+        
+        
+        //Tank(int initialXPosition, Terrain t, char player, Object colour)
+        Tank createdTank = new Tank(50,terrain,'N',color);
+        System.out.println("Test");
+
+        //assertExplossionQueue is empty
+        assertNull(app.getExplossion(0));
+
+
+        //Destroy tank
+        createdTank.setHealth(-100);
+
+        assertNotNull(app.getExplossion(0));
+
+        app.drawTerrain();
+        app.delay(4000);
+
+
+    }
 }

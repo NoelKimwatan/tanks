@@ -10,8 +10,7 @@ public class Explosion implements Coordinates{
     private double yPosition;
     private double explosionRadius;
     private double explosionMaxRadiud;
-
-    public boolean delete = false;
+    private boolean delete = false;
     
 
     /**
@@ -84,6 +83,14 @@ public class Explosion implements Coordinates{
             //System.out.println("Explossion is deleted");
             this.delete = true;
         }
+    }
+
+    /**
+     * A getter method to obtain if an Explossion has been deleted
+     * @return A boolean representing whether an explossion has been deleted ot not
+     */
+    public boolean isDeleted(){
+        return this.delete;
     }
 
     /**

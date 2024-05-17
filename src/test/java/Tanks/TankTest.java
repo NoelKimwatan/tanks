@@ -12,9 +12,9 @@ public class TankTest {
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000);
 
+        Terrain terrain = app.getTerrain();
         Object color = "0,0,0";
-
-        Tank newtank = new Tank(14,App.getGameterrain(),'e',color);
+        Tank newtank = new Tank(14,terrain,'e',color);
         assertNotNull(newtank);
         //app.exit();
     }
@@ -24,10 +24,11 @@ public class TankTest {
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000);  
+        Terrain terrain = app.getTerrain();
 
         Object color = "0,0,0";
 
-        Tank newtank = new Tank(14,app.getGameterrain(),'e',color);
+        Tank newtank = new Tank(14,terrain,'e',color);
         double current  = newtank.getXPosition();  
         app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 39));
         app.delay(1000); 
@@ -40,11 +41,13 @@ public class TankTest {
     public void testTurretMovement(){
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);  
+        app.delay(5000); 
+
+        Terrain terrain = app.getTerrain();
 
         Object color = "0,0,0";
 
-        Tank newtank = new Tank(14,app.getGameterrain(),'e',color);
+        Tank newtank = new Tank(14,terrain,'e',color);
 
         double turretangle = newtank.getTurrentAngle();
 
@@ -63,8 +66,9 @@ public class TankTest {
 
         Object color = "0,0,0";
 
-        Tank newtank = new Tank(14,App.getGameterrain(),'e',color);
-        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,app.getGameterrain(),newtank,true);
+        Terrain terrain = app.getTerrain();
+        Tank newtank = new Tank(14,terrain,'e',color);
+        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,newtank,true);
         newtank.tankDamage(-50,newProjectile);
 
         double current  = newtank.getXPosition();  
@@ -82,20 +86,23 @@ public class TankTest {
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000); 
 
+        Terrain terrain = app.getTerrain();
+
         Object color = "0,0,0";
 
         //Initialise Tank one
-        Tank tankOne = new Tank(14,app.getGameterrain(),'e',color);
+        Tank tankOne = new Tank(14,terrain,'e',color);
         int tankOneInitialScore = tankOne.getTankScore();
         assertEquals(tankOneInitialScore,0);
 
         //Initialise Tank two
-        Tank tankTwo = new Tank(16,app.getGameterrain(),'r',color);  
+        
+        Tank tankTwo = new Tank(16,terrain,'r',color);  
         int tankTwoInitialScore = tankTwo.getTankScore(); 
         assertEquals(tankTwoInitialScore,0);
 
         //Projectile fired from TankTwo 
-        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,app.getGameterrain(),tankTwo,true);
+        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,tankTwo,true);
         tankOne.tankDamage(60,newProjectile); //Projectile from Tank Two damages Tank One
 
         //Assert score added to Tank Two and not Tank One
@@ -117,7 +124,8 @@ public class TankTest {
         
         Object color = "0,0,0";
         
-        Tank newtank = new Tank(14,app.getGameterrain(),'e',color);
+        Terrain terrain = app.getTerrain();
+        Tank newtank = new Tank(14,terrain,'e',color);
         assertNotNull(newtank);
 
         double turrentAngle = newtank.getTurrentAngle();
@@ -136,7 +144,8 @@ public class TankTest {
 
         Object color = "0,0,0";
         
-        Tank newtank = new Tank(14,app.getGameterrain(),'e',color);
+        Terrain terrain = app.getTerrain();
+        Tank newtank = new Tank(14,terrain,'e',color);
         
         assertNotNull(newtank);
 
@@ -168,7 +177,8 @@ public class TankTest {
         app.delay(5000);
         
         Object color = "0,0,0";
-        Tank newtank = new Tank(14,app.getGameterrain(),'e',color);
+        Terrain terrain = app.getTerrain();
+        Tank newtank = new Tank(14,terrain,'e',color);
         int initialParachuteNo = newtank.getParachuteNo();
         double initialYPosition = newtank.getYPosition();
         System.out.println("Initial Position"+initialYPosition);
@@ -183,7 +193,7 @@ public class TankTest {
         newtank.setYPosition(newtank.getYPosition() - 200);
         assertEquals(newtank.getYPosition(),(initialYPosition -200));
         
-        Projectile newProjectile = new Projectile(newtank.getXPosition(), newtank.getYPosition(),100, 0,App.getGameterrain(),newtank,true);
+        Projectile newProjectile = new Projectile(newtank.getXPosition(), newtank.getYPosition(),100, 0,terrain,newtank,true);
         newtank.checkTankFalling(newProjectile);
         assertTrue(newtank.istankFalling());
 
@@ -193,10 +203,12 @@ public class TankTest {
         app.delay(2000);
 
         //Test Tank falling without Parachutes
-        newtank.setParachuteNo(0);
+        newtank.setParachuteNo(-100);
+        assertEquals(newtank.getParachuteNo(),0);
         newtank.setYPosition(newtank.getYPosition() - 200);
-        Projectile newSecondProjectile = new Projectile(newtank.getXPosition(), newtank.getYPosition(),100, 0,App.getGameterrain(),newtank,true);
+        Projectile newSecondProjectile = new Projectile(newtank.getXPosition(), newtank.getYPosition(),100, 0,terrain,newtank,true);
         newtank.checkTankFalling(newSecondProjectile);
+        app.delay(100);
         assertTrue(newtank.istankFalling());
         app.delay(5000);
     }
@@ -207,11 +219,23 @@ public class TankTest {
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000); 
 
-        Tank firstTank = app.getAliveTanks().get(1);
-        Tank secondTank = app.getAliveTanks().get(2);
+        app.resetGame();
+        app.delay(5000); 
+
+        Terrain terrain = app.getTerrain();
+        Object color = "0,0,0";
+
+
+        //Tank(int initialXPosition, Terrain t, char player, Object colour)
+        Tank firstTank = new Tank(50,terrain,'N',color);
+        Tank secondTank = new Tank(150,terrain,'O',color);
+
+        // Tank firstTank = app.getAliveTanks().get(0);
+        // Tank secondTank = app.getAliveTanks().get(1);
+
 
         //Earn posints
-        Projectile newProjectile = new Projectile(secondTank.getXPosition(), secondTank.getYPosition(),100, 0,app.getGameterrain(),firstTank,true);
+        Projectile newProjectile = new Projectile(secondTank.getXPosition(), secondTank.getYPosition(),100, 0,terrain,firstTank,true);
         secondTank.tankDamage(100,newProjectile);
 
         //Check Tank has earned score and has destroyed the other Tank
@@ -266,9 +290,11 @@ public class TankTest {
 
 
         //----------------------Fire Larger Projectile--------------------
+        firstTank.setTurrentAngle(0);
         firstTank.fire();
-        app.delay(60);
+        //app.delay(60);
         Projectile firstProjectile = app.getProjectile(0);
+        System.out.println("Test");
 
         assertSame(firstProjectile.getSourceTank(),firstTank);
         assertTrue(firstProjectile.isLargerProjectile());
@@ -278,7 +304,12 @@ public class TankTest {
     public void checkIfTankBelowMap(){
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
+        app.delay(5500); 
+
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
+        
 
         Tank firstTank = app.getAliveTanks().get(0);
         firstTank.setYPosition(App.HEIGHT+50);
@@ -294,7 +325,12 @@ public class TankTest {
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000); 
 
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
+
         Tank firstTank = App.getAliveTanks().get(0);  
+        assertNotNull(firstTank.toString());
 
         //Check if power is below 0
         firstTank.setTankPower(-100);   
@@ -307,21 +343,17 @@ public class TankTest {
         assertEquals(firstTank.getTankPower(),100); //Power should be taken to 100
     }
 
-    @Test
-    public void checkTankToString(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);
 
-        Tank firstTank = app.getAliveTanks().get(0);  
-        assertNotNull(firstTank.toString());
-    }
 
     @Test
     public void testSetPosition(){
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
         app.delay(5000); 
+
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
 
         Tank firstTank = app.getAliveTanks().get(0);  
 
@@ -350,5 +382,152 @@ public class TankTest {
         System.out.println("Tank test - End");
 
     }
+
+    @Test
+    public void testSetParachute(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(5000); 
+
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
+
+        Tank firstTank = app.getAliveTanks().get(0);  
+
+
+        //Change Parachute No
+        firstTank.setParachuteNo(10);
+        assertEquals(firstTank.getParachuteNo(),10);
+
+        //Set Parachute No to below 0
+        firstTank.setParachuteNo(-20);
+        assertEquals(firstTank.getParachuteNo(),0);
+    }
+
+    @Test
+    public void testTankExplossionOutsideMap(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(5000); 
+
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
+
+        Tank firstTank = app.getAliveTanks().get(0);  
+        int tanksXPosition = (int)firstTank.getXPosition();
+
+        int startPosition = 0;
+        int endposition = App.WIDTH;
+        System.out.println("Test");
+
+        if(tanksXPosition >= 60){
+            startPosition = tanksXPosition -60;
+        }
+
+        if(tanksXPosition <= (App.WIDTH - 60)){
+            endposition = (tanksXPosition + 60);
+        }
+
+        //Remove terrain below Tank +-30
+        for(int i = startPosition; i < endposition; i++){
+            terrain.setTerrainHeight(i,(App.HEIGHT + 50));
+        }
+
+        app.delay(100);
+
+        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,firstTank,true);
+        firstTank.checkTankFalling(newProjectile);
+
+
+        //Set health to 0 while falling
+        firstTank.setHealth(-100);
+        assertTrue(firstTank.istankFalling());
+        
+        //Tank should not be deleted when its falling. It is deleted once it reaches the ground
+        assertFalse(firstTank.isNotActive());
+
+        while(firstTank.istankFalling()){
+            System.out.println("Tank Falling");
+            app.delay(1000);
+        }
+
+        //Once tank falls it should explode because health is 0
+        assertTrue(firstTank.isNotActive());
+    }
+
+    @Test
+    public void testTankFallingWithoutParachute(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(5000); 
+
+        Terrain terrain = app.getTerrain();
+        terrain.resetTanks();
+        app.delay(3000);
+
+        Object color = "0,0,0";
+
+
+        //Tank(int initialXPosition, Terrain t, char player, Object colour)
+        //Tank firstTank = new Tank(50,terrain,'N',color);
+        Tank firstTank = app.getAliveTanks().get(1);  
+        System.out.println("After Init Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
+        firstTank.setParachuteNo(0);
+        int tanksXPosition = (int)firstTank.getXPosition();
+        
+
+        int startPosition = 0;
+        int endposition = App.WIDTH;
+
+        if(tanksXPosition >= 60){
+            startPosition = tanksXPosition -60;
+        }
+
+        if(tanksXPosition <= (App.WIDTH - 60)){
+            endposition = (tanksXPosition + 60);
+        }
+
+        //Remove terrain below Tank +-30
+        for(int i = startPosition; i < endposition; i++){
+            terrain.setTerrainHeight(i,(App.HEIGHT + 50));
+        }
+
+        app.delay(100);
+        System.out.println("One Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
+
+        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,firstTank,true);
+        //Check Tank falling for over 100 pixels
+        System.out.println("Two Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
+        firstTank.setYPosition(100);
+        firstTank.checkTankFalling(newProjectile); 
+
+
+
+        assertTrue(firstTank.istankFalling());
+        
+        System.out.println("Three Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
+        System.out.println("Tank position: ("+firstTank.getXPosition()+","+firstTank.getYPosition()+")");
+        //Tank should not be deleted when its falling. It is deleted once it reaches the ground
+        assertFalse(firstTank.isNotActive());
+
+        while(firstTank.istankFalling()){
+            System.out.println("Tank Falling");
+            app.delay(1000);
+        }
+
+        app.delay(5000);
+        //Once tank falls it should explode beacsue it has fallen for over 100px without a parachute
+        System.out.println("Three Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
+        System.out.println("Tank position: ("+firstTank.getXPosition()+","+firstTank.getYPosition()+")");
+        assertTrue(firstTank.isNotActive());
+        assertTrue(firstTank.isNotActive());
+
+    }
+
     
-}
+
+    }
+    
+
