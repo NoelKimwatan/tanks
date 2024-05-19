@@ -4,530 +4,467 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 import processing.event.KeyEvent;
 
+import java.util.*;
+
 public class TankTest {
+
 
     @Test
     public void testTankInitialisation(){
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);
+        app.delay(4000);
 
-        Terrain terrain = app.getTerrain();
+        //Create Tank Object
         Object color = "0,0,0";
+        Terrain terrain = app.getTerrain();
         Tank newtank = new Tank(14,terrain,'e',color);
+
         assertNotNull(newtank);
-        //app.exit();
-    }
+        assertNotNull(newtank.toString());
 
-    @Test
-    public void testTankMovement(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);  
-        Terrain terrain = app.getTerrain();
-
-        Object color = "0,0,0";
-
-        Tank newtank = new Tank(14,terrain,'e',color);
-        double current  = newtank.getXPosition();  
-        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 39));
-        app.delay(1000); 
-
-        assertNotSame(current,newtank.getXPosition() );
-        //app.exit();
-    }
-
-    @Test
-    public void testTurretMovement(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Terrain terrain = app.getTerrain();
-
-        Object color = "0,0,0";
-
-        Tank newtank = new Tank(14,terrain,'e',color);
-
-        double turretangle = newtank.getTurrentAngle();
-
-        //Pressing Up on the keyboard
-        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 38));
-        app.delay(2000);
-        assertNotSame(turretangle, newtank.getTurrentAngle());
-        //app.exit();
-    }
-
-    @Test
-    public void testTankDamage(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Object color = "0,0,0";
-
-        Terrain terrain = app.getTerrain();
-        Tank newtank = new Tank(14,terrain,'e',color);
-        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,newtank,true);
-        newtank.tankDamage(-50,newProjectile);
-
-        double current  = newtank.getXPosition();  
-        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 39));
-        app.delay(1000); 
-
-        assertNotSame(current,newtank.getXPosition() );
-        //app.exit();
-        //getTurrentAngle
-    }
-
-    @Test
-    public void testTankDamageAndScores(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Terrain terrain = app.getTerrain();
-
-        Object color = "0,0,0";
-
-        //Initialise Tank one
-        Tank tankOne = new Tank(14,terrain,'e',color);
-        int tankOneInitialScore = tankOne.getTankScore();
-        assertEquals(tankOneInitialScore,0);
-
-        //Initialise Tank two
-        
-        Tank tankTwo = new Tank(16,terrain,'r',color);  
-        int tankTwoInitialScore = tankTwo.getTankScore(); 
-        assertEquals(tankTwoInitialScore,0);
-
-        //Projectile fired from TankTwo 
-        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,tankTwo,true);
-        tankOne.tankDamage(60,newProjectile); //Projectile from Tank Two damages Tank One
-
-        //Assert score added to Tank Two and not Tank One
-        assertEquals(tankOne.getTankScore(),0);
-        assertEquals(tankTwo.getTankScore(),60);
-
-        //Assert Health decrease on Tank One and not on tank two
-        assertEquals(40,tankOne.getTankHealth());
-        assertEquals(100,tankTwo.getTankHealth());
-    }
-
-
-
-    @Test
-    public void testTurrentMove(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);
-        
-        Object color = "0,0,0";
-        
-        Terrain terrain = app.getTerrain();
-        Tank newtank = new Tank(14,terrain,'e',color);
-        assertNotNull(newtank);
-
-        double turrentAngle = newtank.getTurrentAngle();
-
-        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 38));
-        app.delay(500);
-        assertNotSame(turrentAngle,newtank.getTurrentAngle());
-        //app.exit();
-    }
-
-    @Test
-    public void testTankFire(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);   
-
-        Object color = "0,0,0";
-        
-        Terrain terrain = app.getTerrain();
-        Tank newtank = new Tank(14,terrain,'e',color);
-        
-        assertNotNull(newtank);
-
-        //Set current player to Tank
+        //Test set Tank to current player and Assert current player is Tank player
         app.setCurrentPlayer(newtank);
-
-        //Check current player is set
         assertSame(app.currentPlayer(),newtank);
 
-        //Fire a projectile
-        newtank.setTurrentAngle(0);
-        newtank.fire();
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
 
-        Projectile firstProjectileInQueue = app.getProjectile(0);
-        
-
-        //Test a projectile was fired
-        assertNotNull(firstProjectileInQueue);
-
-        //Test Projectile was from initialised tank
-        assertSame(firstProjectileInQueue.getSourceTank(),newtank);
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
     }
 
+    @Test
+    public void testSetTanksXPosition(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(4000);
+        Object color = "0,0,0";
+        Terrain terrain = app.getTerrain();
+        Tank newtank = new Tank(14,terrain,'e',color);
+
+        //Set Tanks position to be to the Right
+        newtank.setXPosition(900);
+
+        //Assert value set to 848. 16 pixels away from the edge to ensure Tanks Edges are in screen
+        assertTrue(newtank.getXPosition() == (App.WIDTH - (Tank.TANKBOTTOMWIDTH/2)));
+
+        //Set Tanks position to be to the Left
+        newtank.setXPosition(-100);
+        //Assert value set to 16. 16 pixels away from the edge to ensure Tanks Edges are in screen
+        assertTrue(newtank.getXPosition() == (Tank.TANKBOTTOMWIDTH/2));
+
+        newtank = null;
+    }
+
+    @Test
+    public void testSetTanksYPosition(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(4000);
+
+        Object color = "0,0,0";
+        Terrain terrain = app.getTerrain();
+        Tank newtank = new Tank(14,terrain,'e',color);
+
+        //Set Tanks Y position to be to below Map
+        double initialYPosition = newtank.getYPosition();
+        newtank.setYPosition(initialYPosition - 150);
+
+        assertEquals((initialYPosition - 150),newtank.getYPosition());
+
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
+
+    }
 
     @Test
     public void testTankFalling(){
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000);
-        
-        Object color = "0,0,0";
+        app.delay(4000);
+
+        Tank currentPlayer = app.currentPlayer();
         Terrain terrain = app.getTerrain();
-        Tank newtank = new Tank(14,terrain,'e',color);
-        int initialParachuteNo = newtank.getParachuteNo();
-        double initialYPosition = newtank.getYPosition();
-        System.out.println("Initial Position"+initialYPosition);
 
+        //Set Tank floating 100 pixels
+        double positionToSet = currentPlayer.getYPosition() - 100;
+        currentPlayer.setYPosition(positionToSet);
 
-        //assert Iniatl Parachute no is 3
-        assertEquals(initialParachuteNo,3);
+        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,currentPlayer,false);
 
-        //System.out.println("Before raise Tank position: ("+newtank.getXPosition()+","+newtank.getYPosition()+")");
+        //Assert Tank still floating
+        assertEquals(currentPlayer.getYPosition(),positionToSet);
 
-        //Set Y position to above and check if falling
-        newtank.setYPosition(newtank.getYPosition() - 200);
-        assertEquals(newtank.getYPosition(),(initialYPosition -200));
-        
-        Projectile newProjectile = new Projectile(newtank.getXPosition(), newtank.getYPosition(),100, 0,terrain,newtank,true);
-        newtank.checkTankFalling(newProjectile);
-        assertTrue(newtank.istankFalling());
+        currentPlayer.checkTankFalling(newProjectile);
 
+        app.delay(1000);
 
-        //Check Parachute no has decreased
-        assertEquals(newtank.getParachuteNo(),(initialParachuteNo - 1));
-        app.delay(2000);
+        //Assert Tank has fallen
+        assertNotEquals(currentPlayer.getYPosition(),positionToSet);
 
-        //Test Tank falling without Parachutes
-        newtank.setParachuteNo(-100);
-        assertEquals(newtank.getParachuteNo(),0);
-        newtank.setYPosition(newtank.getYPosition() - 200);
-        Projectile newSecondProjectile = new Projectile(newtank.getXPosition(), newtank.getYPosition(),100, 0,terrain,newtank,true);
-        newtank.checkTankFalling(newSecondProjectile);
-        app.delay(100);
-        assertTrue(newtank.istankFalling());
-        app.delay(5000);
-    }
+        //Assert Health has not decreased because of Parachute
+        assertEquals(currentPlayer.getTankHealth(),100);
 
-    @Test
-    public void testPowerups(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
+        //Reset game to level 0. Done to ensure no error in other Tests
         app.resetGame();
-        app.delay(5000); 
+        app.delay(4000);
 
-        Terrain terrain = app.getTerrain();
-        Object color = "0,0,0";
-
-
-        //Tank(int initialXPosition, Terrain t, char player, Object colour)
-        Tank firstTank = new Tank(50,terrain,'N',color);
-        Tank secondTank = new Tank(150,terrain,'O',color);
-
-        // Tank firstTank = app.getAliveTanks().get(0);
-        // Tank secondTank = app.getAliveTanks().get(1);
-
-
-        //Earn posints
-        Projectile newProjectile = new Projectile(secondTank.getXPosition(), secondTank.getYPosition(),100, 0,terrain,firstTank,true);
-        secondTank.tankDamage(100,newProjectile);
-
-        //Check Tank has earned score and has destroyed the other Tank
-        assertEquals(firstTank.getTankScore(),100);
-        assertTrue(secondTank.isNotActive());
-
-        app.setCurrentPlayer(firstTank);
-
-        //----------------------Parachute--------------------
-        //Test parachute powerup
-        int initailParachute = 	firstTank.getParachuteNo();
-        int initialScore = firstTank.getTankScore();
-        firstTank.handlePowerUps(80);
-        app.delay(100);
-
-        //Check Parachute have incresed by 1 and score decreased by 15
-        assertEquals(firstTank.getParachuteNo(),(initailParachute+1));
-        assertEquals(firstTank.getTankScore(),(initialScore-15));
-
-        //----------------------Health--------------------
-        //Decrease health to below 100
-        firstTank.setHealth(-30);
-        int initailHealth = firstTank.getTankHealth();
-        initialScore = firstTank.getTankScore();
-        firstTank.handlePowerUps(82);
-        app.delay(100);
-
-        //Check Health have incresed by 20
-        
-        assertEquals(firstTank.getTankHealth(),(initailHealth+20));
-        assertEquals(firstTank.getTankScore(),(initialScore-20));
-
-        //----------------------Fuel Level--------------------
-        int initialFuelLevel = firstTank.getTankFuelLevel();
-        initialScore = firstTank.getTankScore();
-        firstTank.handlePowerUps(70);
-        app.delay(100);
-
-        //Check Health have incresed by 20
-        assertEquals(firstTank.getTankFuelLevel(),(initialFuelLevel+200));
-        assertEquals(firstTank.getTankScore(),(initialScore-10));
-
-        //----------------------Larger Projectile--------------------
-        initialScore = firstTank.getTankScore();
-        firstTank.handlePowerUps(88);
-        app.delay(100);
-
-        //Check Health have incresed by 20
-        assertTrue(firstTank.nextLargerProjectile());
-        assertEquals(firstTank.getTankScore(),(initialScore-20));
-
-
-
-        //----------------------Fire Larger Projectile--------------------
-        firstTank.setTurrentAngle(0);
-        firstTank.fire();
-        //app.delay(60);
-        Projectile firstProjectile = app.getProjectile(0);
-        System.out.println("Test");
-
-        assertSame(firstProjectile.getSourceTank(),firstTank);
-        assertTrue(firstProjectile.isLargerProjectile());
-    }
-
-    @Test
-    public void checkIfTankBelowMap(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5500); 
-
-        Terrain terrain = app.getTerrain();
-        terrain.resetTanks();
-        app.delay(3000);
-        
-
-        Tank firstTank = app.getAliveTanks().get(0);
-        firstTank.setYPosition(App.HEIGHT+50);
-        firstTank.tankBelowMap();
-
-        //Check if tank has been set as not active
-        assertTrue(firstTank.isNotActive());
-    }
-
-    @Test
-    public void testSetPower(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Terrain terrain = app.getTerrain();
-        terrain.resetTanks();
-        app.delay(3000);
-
-        Tank firstTank = App.getAliveTanks().get(0);  
-        assertNotNull(firstTank.toString());
-
-        //Check if power is below 0
-        firstTank.setTankPower(-100);   
-        
-        //Power should be 0 not less than zero
-        assertEquals(firstTank.getTankPower(),0);
-
-        //Check if power is set to over 100
-        firstTank.setTankPower(150);  
-        assertEquals(firstTank.getTankPower(),100); //Power should be taken to 100
-    }
-
-
-
-    @Test
-    public void testSetPosition(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Terrain terrain = app.getTerrain();
-        terrain.resetTanks();
-        app.delay(3000);
-
-        Tank firstTank = app.getAliveTanks().get(0);  
-
-        //Set outside screen
-
-        firstTank.setXPosition(0);
-        assertEquals(firstTank.getXPosition(),16);
-
-        firstTank.setXPosition(850);
-        assertEquals(firstTank.getXPosition(),848);
-
-        //Test turret set
-        firstTank.setTurrentAngle(+2);
-        assertEquals(firstTank.getTurrentAngle(),1.57);
-
-        //Test turret power set
-        firstTank.turrentPower(+1);
-        app.delay(500);  
-        firstTank.turrentPower(-1);
-
-        firstTank.move(-1);
-        app.delay(500); 
-        firstTank.move(1);
-        app.delay(500); 
-
-        System.out.println("Tank test - End");
-
-    }
-
-    @Test
-    public void testSetParachute(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Terrain terrain = app.getTerrain();
-        terrain.resetTanks();
-        app.delay(3000);
-
-        Tank firstTank = app.getAliveTanks().get(0);  
-
-
-        //Change Parachute No
-        firstTank.setParachuteNo(10);
-        assertEquals(firstTank.getParachuteNo(),10);
-
-        //Set Parachute No to below 0
-        firstTank.setParachuteNo(-20);
-        assertEquals(firstTank.getParachuteNo(),0);
-    }
-
-    @Test
-    public void testTankExplossionOutsideMap(){
-        App app = new App();
-        PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
-
-        Terrain terrain = app.getTerrain();
-        terrain.resetTanks();
-        app.delay(3000);
-
-        Tank firstTank = app.getAliveTanks().get(0);  
-        int tanksXPosition = (int)firstTank.getXPosition();
-
-        int startPosition = 0;
-        int endposition = App.WIDTH;
-        System.out.println("Test");
-
-        if(tanksXPosition >= 60){
-            startPosition = tanksXPosition -60;
-        }
-
-        if(tanksXPosition <= (App.WIDTH - 60)){
-            endposition = (tanksXPosition + 60);
-        }
-
-        //Remove terrain below Tank +-30
-        for(int i = startPosition; i < endposition; i++){
-            terrain.setTerrainHeight(i,(App.HEIGHT + 50));
-        }
-
-        app.delay(100);
-
-        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,firstTank,true);
-        firstTank.checkTankFalling(newProjectile);
-
-
-        //Set health to 0 while falling
-        firstTank.setHealth(-100);
-        assertTrue(firstTank.istankFalling());
-        
-        //Tank should not be deleted when its falling. It is deleted once it reaches the ground
-        assertFalse(firstTank.isNotActive());
-
-        while(firstTank.istankFalling()){
-            System.out.println("Tank Falling");
-            app.delay(1000);
-        }
-
-        //Once tank falls it should explode because health is 0
-        assertTrue(firstTank.isNotActive());
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
     }
 
     @Test
     public void testTankFallingWithoutParachute(){
+        //Test Tank falling without Parachute. This will result in a decrease of health
+
         App app = new App();
         PApplet.runSketch(new String[] { "App" }, app);
-        app.delay(5000); 
+        app.delay(4000);
 
+        Tank currentPlayer = app.currentPlayer();
         Terrain terrain = app.getTerrain();
-        terrain.resetTanks();
+
+        int initialHealth = currentPlayer.getTankHealth();
+
+        //Set Parachute No to 0
+        currentPlayer.setParachuteNo(0);
+
+        //Set Tank floating 50 pixels
+        double positionToSet = currentPlayer.getYPosition() - 50;
+        currentPlayer.setYPosition(positionToSet);
+
+        //Assert Tank still floating
+        assertEquals(currentPlayer.getYPosition(),positionToSet);
+
+        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,currentPlayer,false);
+        currentPlayer.checkTankFalling(newProjectile);
         app.delay(3000);
 
+        //Assert Tank has fallen
+        assertNotEquals(currentPlayer.getYPosition(),positionToSet);
+
+        //Assert Tank has fallen to Terrains level
+        assertEquals(terrain.getTerrainHeight((int)currentPlayer.getXPosition()), currentPlayer.getYPosition());
+
+        //Assert Tank has decreased in health by no of pixels fallen (50)
+        assertEquals(currentPlayer.getTankHealth(),(initialHealth - 50));
+
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
+
+    }
+
+    @Test
+    public void testSetterMethods(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(4000);
+
+        Terrain terrain = app.getTerrain();
         Object color = "0,0,0";
+        Tank tankObject = new Tank(14,terrain,'e',color);
+
+        //Test Parachute No cannot be set to lower than 0 and a valid value
+        tankObject.setParachuteNo(-100);
+        assertEquals(tankObject.getParachuteNo(),0);
+        tankObject.setParachuteNo(4);
+        assertEquals(tankObject.getParachuteNo(),4);
+
+        //Test Tank power cannot be set to lower than 0 and a valid value
+        tankObject.setTankPower(-50);
+        assertEquals(tankObject.getTankPower(),0);
+        tankObject.setTankPower(50);
+        assertEquals(tankObject.getTankPower(),50);
+
+        //Test Tank Turret limited to -+ 1.57 radians and a valid value
+        tankObject.setTurrentAngle(-2);
+        assertEquals(tankObject.getTurrentAngle(),-1.57);
+        tankObject.setTurrentAngle(2);
+        assertEquals(tankObject.getTurrentAngle(),1.57);
+        tankObject.setTurrentAngle(0);
+        assertEquals(tankObject.getTurrentAngle(),0);
+
+        //Check health cannot be set to over 100 and a valid value
+        tankObject.setHealth(+200);
+        assertEquals(tankObject.getTankHealth(),100);
+        tankObject.setHealth(-50);
+        assertEquals(tankObject.getTankHealth(),50);
+
+        //Check score cannot be set to below 0 and a valid value
+        tankObject.setTankScore(-200);
+        assertEquals(tankObject.getTankScore(),0);
+        tankObject.setTankScore(50);
+        assertEquals(tankObject.getTankScore(),50);
+
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
+    }
+    
+    @Test
+    public void testPowerUps(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(1000);
+
+        Tank currentPlayer = App.currentPlayer();
+
+        //Increase score to 200 to allow powerups
+        currentPlayer.setTankScore(200);
+
+        //---------------------------------------------------------------------
+        //Test parachute increase power up
+        //---------------------------------------------------------------------
+        int initialParachuteNo = currentPlayer.getParachuteNo();
+        int initialScore = currentPlayer.getTankScore();
+
+        //When 'p' o nkeyboard is pressed
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 80));
+        app.delay(200);
+        //Assert parachute increse and score decrease
+        System.out.println("Parachute no after 'p' press:"+currentPlayer.getParachuteNo() );
+        assertEquals((initialParachuteNo + 1), currentPlayer.getParachuteNo());
+        assertEquals((initialScore - 15), currentPlayer.getTankScore());
 
 
-        //Tank(int initialXPosition, Terrain t, char player, Object colour)
-        //Tank firstTank = new Tank(50,terrain,'N',color);
-        Tank firstTank = app.getAliveTanks().get(1);  
-        System.out.println("After Init Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
-        firstTank.setParachuteNo(0);
-        int tanksXPosition = (int)firstTank.getXPosition();
+        //---------------------------------------------------------------------
+        //Test repar power up
+        //---------------------------------------------------------------------
+        initialScore = currentPlayer.getTankScore();
+        currentPlayer.setHealth(500); // Set to max health
+        currentPlayer.setHealth(-50); //Decrease health by 50
+        int initialHealth = currentPlayer.getTankHealth();
+        assertEquals(initialHealth,50);
+
+        //When 'r' on the keyboard is pressed
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 82));
+        app.delay(200);
         
+        //Assert health decrease and points increase
 
-        int startPosition = 0;
-        int endposition = App.WIDTH;
+        // Assert score has increased by 20
+        assertEquals((initialHealth + 20), currentPlayer.getTankHealth()); 
 
-        if(tanksXPosition >= 60){
-            startPosition = tanksXPosition -60;
-        }
-
-        if(tanksXPosition <= (App.WIDTH - 60)){
-            endposition = (tanksXPosition + 60);
-        }
-
-        //Remove terrain below Tank +-30
-        for(int i = startPosition; i < endposition; i++){
-            terrain.setTerrainHeight(i,(App.HEIGHT + 50));
-        }
-
-        app.delay(100);
-        System.out.println("One Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
-
-        Projectile newProjectile = new Projectile(10.0, 10.0,100, 20,terrain,firstTank,true);
-        //Check Tank falling for over 100 pixels
-        System.out.println("Two Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
-        firstTank.setYPosition(100);
-        firstTank.checkTankFalling(newProjectile); 
+        // Assert score has decreased by 20
+        assertEquals((initialScore - 20), currentPlayer.getTankScore()); 
 
 
+        //---------------------------------------------------------------------
+        //Test add fuel power up
+        //---------------------------------------------------------------------
+        int initialFuel = currentPlayer.getTankFuelLevel();
+        initialScore = currentPlayer.getTankScore();
 
-        assertTrue(firstTank.istankFalling());
-        
-        System.out.println("Three Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
-        System.out.println("Tank position: ("+firstTank.getXPosition()+","+firstTank.getYPosition()+")");
-        //Tank should not be deleted when its falling. It is deleted once it reaches the ground
-        assertFalse(firstTank.isNotActive());
+        //When 'f' on keyboard is pressed
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 70));
+        app.delay(200);
 
-        while(firstTank.istankFalling()){
-            System.out.println("Tank Falling");
-            app.delay(1000);
-        }
+        //Assert fuel increase by 200 
+        assertEquals((initialFuel + 200), currentPlayer.getTankFuelLevel());
+        //Assert points decrease by 10
+        assertEquals((initialScore - 10), currentPlayer.getTankScore()); 
 
-        app.delay(5000);
-        //Once tank falls it should explode beacsue it has fallen for over 100px without a parachute
-        System.out.println("Three Tank: "+firstTank.playerCharacter()+" Health: "+firstTank.getTankHealth()+" isFalling: "+firstTank.istankFalling()+" Parachute no: "+firstTank.getParachuteNo()+" isdeleted: "+firstTank.isNotActive());
-        System.out.println("Tank position: ("+firstTank.getXPosition()+","+firstTank.getYPosition()+")");
-        assertTrue(firstTank.isNotActive());
-        assertTrue(firstTank.isNotActive());
+        //---------------------------------------------------------------------
+        //Test larger projectile
+        //---------------------------------------------------------------------
+
+        initialScore = currentPlayer.getTankScore();
+        //When 'x' on keyboard is pressed
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 88));
+        app.delay(200);
+
+        //Assert score decreased by 20
+        assertEquals((initialScore - 20), currentPlayer.getTankScore()); 
+
+        //Simulate Tank fire by pressing space bar
+        app.keyPressed(new KeyEvent(null, 0, 0, 0, ' ', 32));
+
+        //Assert fired projectile is Larger
+        Projectile firedProjectile = app.getProjectile(0);
+        assertTrue(firedProjectile.isLargerProjectile());
+
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
+    }
+
+    @Test
+    public void testTankMove(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(1000);
+
+        Tank currentPlayer = App.currentPlayer();
+
+        //---------------------------------------------------------------------
+        //Test Tank move forward
+        //---------------------------------------------------------------------
+        double initialXPosition = currentPlayer.getXPosition();
+        KeyEvent forwardKey = new KeyEvent(null, 0, 0, 0, ' ', 39);
+        //Press forward
+        app.keyPressed(forwardKey);
+        app.delay(200);
+        //Release forward
+        app.keyReleased(forwardKey);
+        app.delay(200);
+
+        //Assert Tank has moved forward
+        assertTrue(currentPlayer.getXPosition() > initialXPosition);
+
+        //---------------------------------------------------------------------
+        //Test Tank move backward
+        //---------------------------------------------------------------------
+        initialXPosition = currentPlayer.getXPosition();
+        KeyEvent backwardKey = new KeyEvent(null, 0, 0, 0, ' ', 37);
+        //Press forward
+        app.keyPressed(backwardKey);
+        app.delay(200);
+        //Release forward
+        app.keyReleased(backwardKey);
+        app.delay(200);
+
+        //Assert Tank has moved backward
+        assertTrue(currentPlayer.getXPosition() < initialXPosition);
+
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
 
     }
 
-    
+    @Test
+    public void testTurretkMove(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(1000);
 
+        Tank currentPlayer = App.currentPlayer();
+
+        //---------------------------------------------------------------------
+        //Test Turret move left
+        //---------------------------------------------------------------------
+        KeyEvent upKeyEvent = new KeyEvent(null, 0, 0, 0, ' ', 38);
+        double initialTurretAngle = currentPlayer.getTurrentAngle();
+
+        //Press up
+        app.keyPressed(upKeyEvent);
+        app.delay(200);
+        //Release up
+        app.keyReleased(upKeyEvent);
+        app.delay(200);
+
+        //Assert Turret has turned to the Left
+        assertTrue(initialTurretAngle > currentPlayer.getTurrentAngle());
+
+        //---------------------------------------------------------------------
+        //Test Turret move right
+        //---------------------------------------------------------------------
+        KeyEvent downKeyEvent = new KeyEvent(null, 0, 0, 0, ' ', 40);
+        initialTurretAngle = currentPlayer.getTurrentAngle();
+
+        //Press down
+        app.keyPressed(downKeyEvent);
+        app.delay(200);
+        //Release down
+        app.keyReleased(downKeyEvent);
+        app.delay(200);
+
+        //Assert Turret has turned to the Right
+        assertTrue(initialTurretAngle < currentPlayer.getTurrentAngle());
+
+        //----------------------------------------------------------------
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
     }
-    
 
+    @Test
+    public void testPowerChange(){
+        App app = new App();
+        PApplet.runSketch(new String[] { "App" }, app);
+        app.delay(1000);
+
+        Tank currentPlayer = App.currentPlayer();
+
+        //---------------------------------------------------------------------
+        //Test 'W' press
+        //---------------------------------------------------------------------
+        KeyEvent wKeyEvent = new KeyEvent(null, 0, 0, 0, ' ', 87);
+        double initialTankPower = currentPlayer.getTankPower();
+        //Press down
+        app.keyPressed(wKeyEvent);
+        app.delay(200);
+        //Release down
+        app.keyReleased(wKeyEvent);
+        app.delay(200);
+        
+        //Assert power has increased
+        assertTrue(currentPlayer.getTankPower() > initialTankPower);
+
+        //---------------------------------------------------------------------
+        //Test 'S' press
+        //---------------------------------------------------------------------
+
+        KeyEvent sKeyEvent = new KeyEvent(null, 0, 0, 0, ' ', 83);
+        initialTankPower = currentPlayer.getTankPower();
+        //Press down
+        app.keyPressed(sKeyEvent);
+        app.delay(200);
+        //Release down
+        app.keyReleased(sKeyEvent);
+        app.delay(200);
+
+        //Assert power has decreased
+        assertTrue(currentPlayer.getTankPower() < initialTankPower);
+
+        //----------------------------------------------------------------
+        //Reset game to level 0. Done to ensure no error in other Tests
+        app.resetGame();
+        app.delay(4000);
+
+        //Assert game has been reset
+        assertTrue(app.isNewGame());
+        assertFalse(app.isGameover());
+        assertEquals(0,app.getLevel());
+    }
+
+    
+}

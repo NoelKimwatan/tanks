@@ -80,7 +80,6 @@ public class Explosion implements Coordinates{
         if(explosionRadius <= explosionMaxRadiud){
             explosionRadius += 5;
         }else{
-            //System.out.println("Explossion is deleted");
             this.delete = true;
         }
     }

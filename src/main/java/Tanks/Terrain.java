@@ -77,6 +77,7 @@ public class Terrain {
     /**
      * A Getter method to obtain the terrains height at a particular X-position
      * @param xPosition The X-position to obtain the terrains height at
+     * @return The terrains height at the xPosition entered
      */
     public int getTerrainHeight(int xPosition){
         return this.terrainMovingAverageHeight[xPosition];
@@ -103,6 +104,7 @@ public class Terrain {
      * The change wind function, is used to change the windMagnitude value by + or - 5 unit values
      */
     public void changeWind(){
+        //Change wind magnitude by +5 or -5 units
         windMagnitude += (int) ((Math.random() * ((5.0 + 5.0 + 1.0)) - 5.0));
     }   
 
@@ -121,38 +123,17 @@ public class Terrain {
         }
 
         if(App.isNewGame()){
-            System.out.println("New game");
             //Creating tanks and setting up position.  
-            //App.hPlayerSortedLetters = new ArrayList<Character>();
-            //App.alivePlayers = new ArrayList<Character>();
             for(int i: hPlayerPos.keySet()){
                 //getPlayerColours
-                //Tank tank = new Tank(i, this, hPlayerPos.get(i), App.playerColours.get(String.valueOf(hPlayerPos.get(i))));
                 Tank tank = new Tank(i, this, hPlayerPos.get(i), App.getPlayerColours().get(String.valueOf(hPlayerPos.get(i))));
                 App.addTank(hPlayerPos.get(i), tank);
-                //App.alivePlayers.add(tank.playerCharacter());
-                //App.hPlayerSortedLetters.add(tank.playerCharacter());
             }
-            //App.hPlayerSortedLetters.sort(Comparator.naturalOrder());
         }else{
-            System.out.println("Next level");
+            //Reset Tanks for a new level
             resetTanks();
-            //System.out.println("Number of alive players before: "+App.alivePlayers.size());
-            //App.alivePlayers.clear();
-            //System.out.println("Number of alive players after: "+App.alivePlayers.size());
-            // for(int i: hPlayerPos.keySet()){
-            //     Tank tank = App.getTank(hPlayerPos.get(i));
-            //     tank.resetTank(i,this);
-            //     //App.alivePlayers.add(tank.playerCharacter());
-            // }
-            //System.out.println("Number of alive players after after: "+App.alivePlayers.size());
-
         }
-
         drawTerraingraphics();
-        
-        
-
     }
 
     /**
@@ -162,7 +143,6 @@ public class Terrain {
         for(int i: hPlayerPos.keySet()){
             Tank tank = App.getTank(hPlayerPos.get(i));
             tank.resetTank(i,this);
-            //App.alivePlayers.add(tank.playerCharacter());
         }
     }
 
@@ -181,7 +161,6 @@ public class Terrain {
         terrainGraphics.beginDraw();
         terrainGraphics.image(App.getBackgroundImage(), 0, 0);
         terrainGraphics.stroke(App.getForeGroundColor()[0], App.getForeGroundColor()[1], App.getForeGroundColor()[2]);
-
 
         for(int i = 0; i < terrainMovingAverageHeight.length; i++){
             terrainGraphics.line(i,terrainMovingAverageHeight[i],i,App.HEIGHT);

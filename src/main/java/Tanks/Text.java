@@ -13,7 +13,6 @@ public class Text {
     private static PImage windImage1;
     private static PImage windImage2;
     private static PImage windImage;
-    //private static Tank currentPlayer;
     private static double healthLineXCoordinates;
     private static int displayArrowCounter = 60;
     private static int gameOverDisplayCounter;
@@ -49,7 +48,6 @@ public class Text {
      * @param app The App object {@link App}
      */
     public static void refreshText(App app){
-        //currentPlayer = App.currentPlayer();
         displayArrowCounter = 60;
         
         if(terrain.getWindMagnitude() < 0){
@@ -57,7 +55,6 @@ public class Text {
         }else if (terrain.getWindMagnitude() > 0){
             windImage = windImage1;
         }else{
-            //System.out.println("Null wind image selected. Wind speed: "+windMagnitude);
             windImage = null;
         }
     }
@@ -74,7 +71,6 @@ public class Text {
 
         //Fuel indicator
         app.image(fuelImage,(10 * 16),(2 * 16) + 4,32,-32); 
-        //app.text(this.currentPlayer.getTankFuelLevel(),(11 * 16) + 20,(2 * 16)); App.currentPlayer()
         app.text(App.currentPlayer().getTankFuelLevel(),(11 * 16) + 20,(2 * 16));
         
         if (App.getParachuteImage() != null) app.image(App.getParachuteImage(),(10 * 16),(5 * 16) + 4,32,-32); 
@@ -109,7 +105,6 @@ public class Text {
 
         //Draw current player
         if(displayArrowCounter > 0 && !App.isGameover()){
-            //System.out.println("Display arrow");
             app.stroke(0, 0, 0);
             app.line((float)(App.currentPlayer().getXPosition()),(float)(App.currentPlayer().getYPosition() -80), (float)(App.currentPlayer().getXPosition()), (float)(App.currentPlayer().getYPosition() -180));
             app.line((float)(App.currentPlayer().getXPosition()),(float)(App.currentPlayer().getYPosition() -80), (float)(App.currentPlayer().getXPosition() + 20), (float)(App.currentPlayer().getYPosition() -100));
@@ -120,8 +115,6 @@ public class Text {
         //If game over
         int displacement = 0;
         if (App.isGameover()){
-            //Width 864
-            //Height 640
             app.textSize(25);
             Tank winnerTank = App.getTank(App.getSortedPlayerLetters().get(0));
             app.text("Player "+winnerTank.playerCharacter() + " wins!",(App.WIDTH/2 - 150),(App.HEIGHT/2 - 130));
@@ -135,7 +128,6 @@ public class Text {
 
             displacement = 0;
             for (char c : App.getSortedPlayerLetters()){
-                //Every 0.7 seconds is 30 * 0.7 = 21 frames
                 if(((App.getSortedPlayerLetters().indexOf(c) + 1) * (0.7 * App.FPS)) <=  gameOverDisplayCounter){
                     Tank loopTank = App.getTank(c);
                     app.fill(loopTank.getTanksColour()[0],loopTank.getTanksColour()[1],loopTank.getTanksColour()[2]);
@@ -161,7 +153,6 @@ public class Text {
     
             for (char c : App.getSortedPlayerLetters()){
                 Tank loopTank = App.getTank(c);
-                //System.out.println("Character: "+c);
                 app.fill(loopTank.getTanksColour()[0], loopTank.getTanksColour()[1], loopTank.getTanksColour()[2]);
                 app.text("Player "+ loopTank.playerCharacter(), (float)((46 * 16) + 4),(float)((5.7 * 16.00) + displacement));
                 app.text(loopTank.getTankScore(), (float)((51 * 16) + 4),(float)((5.7 * 16.00) + displacement));

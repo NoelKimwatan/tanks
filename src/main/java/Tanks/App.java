@@ -34,14 +34,6 @@ public class App extends PApplet {
     public static final int BOARD_HEIGHT = 20;
     public static final int INITIAL_PARACHUTES = 1;
     public static final int FPS = 30;
-
-
-    //Private variables
-    private String configPath;
-
-    public static Random random = new Random();
-
-    //Created
     private static PImage background;
     private static PImage parachuteImage;
     private static int[] foreGroundColor;
@@ -52,25 +44,15 @@ public class App extends PApplet {
     private static int changeLevelCounter = 30;  //1 second == 30 frames
     private static int levelNo = 0;
     private static boolean newGame = true;
-
-
-
-    
-    
-    //public static ArrayList<Tank> tanks = new ArrayList<Tank>();
-
-
+    private String configPath;
     private static HashMap<Character,Tank> tanks;
     private static ArrayList<Character> hPlayerSortedLetters;
     private static ArrayList<Character> alivePlayers;
     private static ArrayList<Projectile> projectileQueue = new ArrayList<Projectile>();
     private static ArrayList<Explosion> explossionQueue = new ArrayList<Explosion>();
-
     private static Text textObject;
     private static int currentPlayerNo = 0;
     private static Tank currentPlayer;
-    
-
     private static JSONObject playerColours;
 
 	
@@ -99,9 +81,6 @@ public class App extends PApplet {
 
         //Set text size to 14
         this.textSize(14);
-		//See PApplet javadoc:
-		//loadJSONObject(configPath)
-		//loadImage(this.getClass().getResource(filename).getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
 
         //Loading configPath
         JSONObject configJSON = loadJSONObject(configPath);
@@ -113,17 +92,15 @@ public class App extends PApplet {
         playerColours = (JSONObject)configJSON.get("player_colours");
         String treesFileName;
 
+        //Loading the snow background image
+        background = this.loadImage(this.getClass().getResource(backgroundFileName).getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
+        foreGroundColor  = new int[]{Integer.valueOf(foreGroundColorName[0]), Integer.valueOf(foreGroundColorName[1]), Integer.valueOf(foreGroundColorName[2])};
+
         try{
             treesFileName = configJSON.getJSONArray("levels").getJSONObject(levelNo).get("trees").toString();
         }catch(Exception e){
             treesFileName = null;
         }
-
-
-
-        //Loading the snow background image
-        background = this.loadImage(this.getClass().getResource(backgroundFileName).getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
-        foreGroundColor  = new int[]{Integer.valueOf(foreGroundColorName[0]), Integer.valueOf(foreGroundColorName[1]), Integer.valueOf(foreGroundColorName[2])};
 
         //Load tree image
         if(treesFileName != null){
@@ -132,19 +109,18 @@ public class App extends PApplet {
             tree = null;
         }
         
+        //Loading parachuteImage
         try{
             parachuteImage =loadImage(getClass().getResource("parachute.png").getPath().toLowerCase(Locale.ROOT).replace("%20", " "));
         }catch(Exception e){
             parachuteImage = null;
         }
-        //Loading terraine
-        //File level = this.
+
         File levelFile = new File(terrainFileName);
 
+        //Loading terrain file
         try{
-
             Scanner next = new Scanner(levelFile);
-
             int row = 0;
             while(next.hasNext()){  
                 String line = next.nextLine();
@@ -152,19 +128,12 @@ public class App extends PApplet {
                 row++;
             }   
             next.close();
-
         } catch (FileNotFoundException e){
-
             System.out.println("File not found");
-
         }
-
-        //Set image backgroud once
-        //this.image(this.background, 0, 0);
 
         //Reset variables if its a new game
         if(App.isNewGame()){
-            //System.out.println("App: This is a new game");
             hPlayerSortedLetters = new ArrayList<Character>();
             tanks = new HashMap<Character,Tank>();
             alivePlayers = new ArrayList<Character>();
@@ -173,15 +142,7 @@ public class App extends PApplet {
         //Setup terrain
         gameTerraine = new Terrain(BOARD_HEIGHT,28,terrain,this);
         gameTerraine.setup();
-
         gameTerraine.draw(this);
-
-
-
-
-        // System.out.println("Alive players size: "+alivePlayers.size());
-        // System.out.println("hPlayerSortedLetters size: "+hPlayerSortedLetters.size());
-        
 
         //Sort all players once added
         alivePlayers.sort(Comparator.naturalOrder());
@@ -189,17 +150,10 @@ public class App extends PApplet {
 
         //Sort players list if its a new game
         if(App.isNewGame()){
-            //System.out.println("App: Is new game hence sort hPlayerSortedLetters");
             hPlayerSortedLetters.sort(Comparator.naturalOrder());
         }
-        //System.out.println("Current player: "+currentPlayer.playerCharacter());
 
         currentPlayer = App.getTank(App.hPlayerSortedLetters.get(0));
-        //System.out.println("Current player selected: "+currentPlayer.playerCharacter());
-
-
-        //Setup trees
-        //System.out.println("Printing terraine: "+gameTerraine);
 
         //Setup text
         textObject = new Text(this,gameTerraine);
@@ -214,7 +168,8 @@ public class App extends PApplet {
     }
 
     /**
-     * A getter 
+     * A getter method to obtain the player colours from the JSON file
+     * @return A JSON object of all the player colours
      */
     public static JSONObject getPlayerColours(){
         return App.playerColours;
@@ -295,7 +250,6 @@ public class App extends PApplet {
         tanks.put(c,tank);
         addAlivePlayer(c);
         if(App.isNewGame()){
-            //System.out.println("App: Added player: "+c+" To new game and player variable");
             if(!hPlayerSortedLetters.contains(c)){
                 hPlayerSortedLetters.add(c);
             }
@@ -328,7 +282,7 @@ public class App extends PApplet {
      * @see Tank
      */
     public static void setCurrentPlayer(Tank currentToSet){
-        currentPlayer = currentToSet;
+        App.currentPlayer = currentToSet;
     }
 
     /**
@@ -341,14 +295,8 @@ public class App extends PApplet {
         for(Tank tank: tanks.values()){
             if(!tank.isNotActive()){
                 aliveTanks.add(tank);
-            }else{
-                // if(App.alivePlayers.contains(tank.playerCharacter())){
-                //     App.alivePlayers.remove(tank.playerCharacter()); 
-                //     System.out.println("Tank deleted");
-                // }
             }
         }
-
         return aliveTanks;
     }
 
@@ -370,75 +318,50 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(KeyEvent event){
-        //System.out.println("Keyboard pressed: "+ event.getKeyCode());
         int code = event.getKeyCode();
 
         //Check for key press only if game is not Over
         if(!gameOver){
-
+            //Forward pressed
             if(code == 39){
-                //System.out.println("Forward pressed");
                 currentPlayer.move(1);
+            //Back pressed
             }else if(code == 37){
-                //System.out.println("Back pressed");
                 currentPlayer.move(-1);
+            //Up button pressed
             }else if(code == 38){
-                //System.out.println("Up button pressed");
                 currentPlayer.turrentMovement(-1);
+            //Down button pressed
             }else if(code == 40){
-                //System.out.println("Down button pressed");
                 currentPlayer.turrentMovement(1);
+            //Space pressed
             }else if(code == 32){
-                //System.out.println("Spacebar pressed");
                 currentPlayer.fire();
-                // System.out.println("Current player no: "+currentPlayerNo);
-                // currentPlayerNo = currentPlayerNo + 1;
-                // System.out.println("Current player no after: "+currentPlayerNo);
+                //Change wind when changing player
                 gameTerraine.changeWind();
                 this.changeCurrentPlayer();
 
-
+                //If no players alive change level
                 if(alivePlayers.size() <= 1){
-                    //System.out.println("Only 1 alive player");
                     changeLevel();
                 }
-
-
-
-
+            //W Pressed
             }else if(code == 87){
-                //W has been pressed
                 currentPlayer.turrentPower(+1);
-                //System.out.println("Button 87 pressed");
+            //S Pressed
             }else if(code == 83){
-                //S pressed
                 currentPlayer.turrentPower(-1);
-                //System.out.println("Button 83 pressed");
+            //When power up pressed
             }else if(code == 80 || code == 82 || code == 70 || code == 88){
-                //Check if player has pressed p to purchase parachute
-                // 80, 82, 70
+                //Hand power ups
                 currentPlayer.handlePowerUps(code);
-
             }
         }else{
             if(code == 82){
-                //System.out.println("Game reset");
-                // levelNo = 0;
-                // App.newGame = true;
-                // gameOver = false;
-                // App.hPlayerSortedLetters = new ArrayList<Character>(); 
-                // setup();
-                //Resets game after game is over an 'r' is pressed
+                //When game over and player pressed 'r'
                 this.resetGame();
             }
-        }
-
-        //39 forward
-        //37 back
-        //38 up
-        //40 down
-        //32 spacebar
-        
+        }        
     }
 
     /**
@@ -448,11 +371,13 @@ public class App extends PApplet {
 	@Override
     public void keyReleased(KeyEvent event){
         if(event.getKeyCode() == 39 || event.getKeyCode() == 37){
+            //Stop movement when back or forward button released
             currentPlayer.move(0);
         }else if(event.getKeyCode() == 38 || event.getKeyCode() == 40){
+            //Stop Turrent movement when up or down button released
             currentPlayer.turrentMovement(0);
         }else if(event.getKeyCode() == 83 || event.getKeyCode() == 87){
-            //System.out.println("Button 83 or 87 released");
+            //Stop power increase or decrease when 'w' or 's' released
             currentPlayer.turrentPower(0);
         }
     }
@@ -463,8 +388,6 @@ public class App extends PApplet {
      */
     @Override
     public void mousePressed(MouseEvent e) {
-        //TODO - powerups, like repair and extra fuel and teleport
-
 
     }
 
@@ -489,27 +412,19 @@ public class App extends PApplet {
      * This function changes the current player to the next consecutive player
      */
     public void changeCurrentPlayer(){
-        System.out.println("Changing current player");
-        //System.out.print("Player changed from: "+currentPlayer.playerCharacter()+" to: ");
         currentPlayerNo += 1;
-
 
         if(getAliveTanks().size() > 1){
             while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).isNotActive() == true &&  getAliveTanks().size() > 1){
                 currentPlayerNo = currentPlayerNo + 1;
-                System.out.println("Selected player is deleted");
             }
             currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
         }else if(getAliveTanks().size() == 1){
             currentPlayer = getAliveTanks().get(0);
 
         }else if(getAliveTanks().size() <= 0){
-            System.out.println("Alive players are 0");
             changeLevel();
         }
-
-    
-
     }
 
 
@@ -535,7 +450,6 @@ public class App extends PApplet {
      * @return The projectile Object or Null
      */
     public static Projectile getProjectile(int index){
-        //projectileQueue.get(i);
         if (index < projectileQueue.size()){
             return projectileQueue.get(index);
         }else{
@@ -550,7 +464,6 @@ public class App extends PApplet {
      * @return The explossion object
      */
     public static Explosion getExplossion(int index){
-        //projectileQueue.get(i);
         if (index < explossionQueue.size()){
             return explossionQueue.get(index);
         }else{
@@ -559,19 +472,25 @@ public class App extends PApplet {
     }    
 
 
+
+
     /**
      * Changes the game level once a game level is over. The function deletes all current projectiles and increaments the level number 
      * One a player gets to the last level the gema is over 
      */
-    private void changeLevel(){
+    public void changeLevel(){
+        //Clear all projectiles and explossions when changing levels
         explossionQueue.clear();
         projectileQueue.clear();
+
+        //Restart current player counter
         currentPlayerNo = 0;
+        //Restart change level counter
         changeLevelCounter = 30;
 
+        //When level two is over the game os over
         if(levelNo == 2){
             gameOver = true;
-            System.out.println("Game over");
 
             //Sort According to Score
             hPlayerSortedLetters.sort(new Comparator<Character>(){
@@ -580,7 +499,7 @@ public class App extends PApplet {
                 }
             });
         }else{
-            System.out.println("Level over");
+            //Vhange level when level is not equal to 2
             levelNo += 1;
             App.newGame = false;
             setup();
@@ -600,51 +519,25 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
-        //System.out.println("App: In draw method");
-        //System.out.println(clock.millis());
 
-        //-------------------------------------------
-        //--------Check no of players remaining------
-        //-------------------------------------------
+        //Start counter when game is over and only 1 player remaining
         if(alivePlayers.size() <= 1 && isGameover() == false){
-            //System.out.println("Level over");
             changeLevelCounter -= 1;
-            //System.out.println("Level change counter: "+changeLevelCounter);
 
             if(changeLevelCounter <= 0){
-                //changeLevelCounter = 60;
                 changeLevel();
             }
         }
         
-        
-        //----------------------------------------------
-        //------Check is current player is deleted------
-        //----------------------------------------------
+        //Change player if current player is deleted
         if(currentPlayer.isNotActive() == true){
             this.changeCurrentPlayer();
-            // while(tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size())).isNotActive() == true && alivePlayers.size() > 1){
-            //     //System.out.println("Current player is deleted");
-            //     currentPlayerNo = currentPlayerNo + 1;
-            // }
-            // currentPlayer = tanks.get(hPlayerSortedLetters.get(currentPlayerNo%hPlayerSortedLetters.size()));
         }
 
-
-
-
-        //-------------------------------------------
-        //----------Stop game when game is over------
-        //-------------------------------------------
-
-
-
-
+        //Draw terrain
         App.gameTerraine.draw(this);
 
-        // -------------------------------------------
-        // ----------Draw explossion from Queue------
-        // -------------------------------------------
+        //Draw explossion in Queue
         if(explossionQueue.size() > 0){
             for(int i = 0; i < explossionQueue.size(); i++){
                 Explosion explosonObject = explossionQueue.get(i);
@@ -657,69 +550,37 @@ public class App extends PApplet {
             }
         }
 
-        //Remove dead players
+        //Remove dead players every frame
         for(Tank tank: tanks.values()){
             if(!tank.isNotActive()){
                 tank.draw(this);
             }else{
                 if(App.alivePlayers.contains(tank.playerCharacter())){
                     App.alivePlayers.remove(App.alivePlayers.indexOf(tank.playerCharacter())); 
-                    //System.out.println("Tank deleted");
                 }            
             }
         }
 
-
-
-
-        //-------------------------------------------
-        //----------Draw projectiles from Queue------
-        //-------------------------------------------
-
+        //Handle projectile if there is a projectile in Queue
         if(projectileQueue.size() > 0){
-            //System.out.println("Alive players: "+alivePlayers.size());
             for(int i = 0; i < projectileQueue.size(); i++){
                 Projectile projectile = projectileQueue.get(i);
-    
+
                 //Only refresh if game is not over
                 if (!gameOver)projectile.refresh();
-    
+                //Remove projectile from Queue if not active or deleted
                 if(projectile.isNotActive()){
                     projectileQueue.remove(i);
                 }else{
-                    //System.out.println("Projectile to delete");
                     projectile.draw(this);
                 }   
             }   
         }
            
-
-
-
-
-
-
         //Refresh text
         textObject.refreshText(this);
         textObject.draw(this);
-
-
-        //----------------------------------
-        //display HUD:
-        //----------------------------------
-        //TODO
-
-        //----------------------------------
-        //display scoreboard:
-        //----------------------------------
-        //TODO
-        
-		//----------------------------------
-        //----------------------------------
-
-        //TODO: Check user action
     }
-
 
     /**
      * The App class main method. This serves as the entrypoint of the Application or game
@@ -728,5 +589,4 @@ public class App extends PApplet {
     public static void main(String[] args) {
         PApplet.main("Tanks.App");
     }
-
 }

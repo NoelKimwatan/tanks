@@ -10,7 +10,6 @@ public class Projectile implements Coordinates {
     private final double MAXPROJECTILEVELOCITY = 18;
     private final double MINPROJECTILEVELOCITY = 2;
     private final double PROJECTILEGRAVITY = (float) (3.6/30.0); //Projectile downward gravity per frame
-
     private double xPosition;
     private double yPosition;
     private double projectileXVelocity;
@@ -18,16 +17,11 @@ public class Projectile implements Coordinates {
     private Terrain terrain;
     private Tank sourceTank;
     private boolean delete = false;
-    //private int craterRadius = 30;
     private int projectileRadius = 10;
     private boolean isLargerProjectile;
-    
     private int projectileEffectRadius = 30;
 
 
-    //private boolean largerProjectile;
-
-    
     /**
      * The projectile constractor
      * @param xPos This is the projectile's X-coordinate. It is initially  Tanks turrent end
@@ -41,24 +35,19 @@ public class Projectile implements Coordinates {
     public Projectile(double xPos, double yPos, double power, double turrentAngle, Terrain terrain, Tank tank, boolean largerProjectile){
         this.setXPosition(xPos);
         this.setYPosition(yPos);
-
         this.terrain = terrain;
         this.sourceTank = tank;
         this.isLargerProjectile = largerProjectile;
-        //this.largerProjectile = largerProjectile;
 
         if(largerProjectile){
             projectileRadius *= 2;
-            //craterRadius *= 2;
             projectileEffectRadius *=2;
         }
-        //System.out.println("Projectile created");
+
 
         float projectileVelocity = (float) ((float) (MINPROJECTILEVELOCITY + ((MAXPROJECTILEVELOCITY - MINPROJECTILEVELOCITY)/100.0 * (float)power)));
-
         projectileXVelocity = projectileVelocity * (float)Math.sin(turrentAngle);
         projectileYVelocity = projectileVelocity * (float)Math.cos(turrentAngle);
-        //System.out.println("Projectile velocity: " + projectileVelocity + " Projectile x velocity: "+ projectileXVelocity + " Projectile Y velocity: "+projectileYVelocity);
     }
 
     /**
@@ -71,12 +60,10 @@ public class Projectile implements Coordinates {
             //If projectile goes outside the screen
             this.xPosition = App.WIDTH;
             this.delete = true;
-            //System.out.println("Projectile deleted");
         }else if(xValue < 0){
             //If projectile goes outside the screen
             this.xPosition = 0;
             this.delete = true;
-            //System.out.println("Projectile deleted");
         }else{
             this.xPosition = xValue;
         }
@@ -93,6 +80,7 @@ public class Projectile implements Coordinates {
             this.yPosition = App.HEIGHT;
             this.delete = true;
         }else{
+            //If projectile is in screen or above
             this.yPosition = yValue;
         }        
     }
@@ -144,27 +132,14 @@ public class Projectile implements Coordinates {
      */
     public void calculateTankDamage(double xImpactPoint, double yImpactpoint){
         for(Tank tank : App.getAliveTanks()){
-            //System.out.println("Checking tank hit: "+tank.playerCharacter());
-
-
-            //getTanksEdges(){
-            //XLeft, XRight, YTop
 
             if(tank.getTanksEdges()[0] <= this.getXPosition() && tank.getTanksEdges()[1] >= this.getXPosition() && tank.getYPosition() >= this.getYPosition() && tank.getTanksEdges()[2] <= this.getYPosition()){ 
-                // System.out.println("Projectile: Direct hit");
-                // System.out.println("Projectile: ("+this.getXPosition()+","+this.getYPosition()+") ");
-                // System.out.println("Tank: "+tank.toString());
                 tank.tankDamage(this.MAXPROJECTILEDAMAGE, this);
             }else{
                 int explosionDamage;
                 double minXDistance;
                 double minYDistance;
-                //System.out.println("Explossion point: X:"+xPosition+" Y:"+yPosition);
 
-                //Find min  Y distance
-                //Top Y Edge <= yImpactpoint
-                //getTanksEdges(){
-                //XLeft, XRight, YTop
                 if(tank.getYPosition() >= yImpactpoint && tank.getTanksEdges()[2] <= yImpactpoint){
                     minYDistance = 0;
                 }else{
@@ -172,9 +147,6 @@ public class Projectile implements Coordinates {
                     double ydistanceTop = Math.abs((tank.getYPosition() - (Tank.TANKSHEIGHT)) - yImpactpoint);
                     minYDistance = Math.min(ydistanceTop,ydistanceBottom);                
                 }
-
-                //getTanksEdges(){
-                //XLeft, XRight, YTop
 
                 //Find min X distance
                 if(tank.getTanksEdges()[0] <= xImpactPoint && tank.getTanksEdges()[1] >= xImpactPoint){
@@ -190,17 +162,10 @@ public class Projectile implements Coordinates {
 
                 if(distanceVector <= projectileEffectRadius ){
                     explosionDamage = (int) ((1 - distanceVector/projectileEffectRadius)*60);
-                    // System.out.println("Explossion damage: "+explosionDamage);
-                    // System.out.println("Projectile: Indirect hit");
-                    // System.out.println("Projectile: ("+this.getXPosition()+","+this.getYPosition()+") . Distance vector: "+distanceVector);
-                    // System.out.println("Tank: "+tank.toString());
-
                     tank.tankDamage(explosionDamage, this);
                 }
-    
                 
             }
-            //System.out.println("Projectile: Tank "+tank.playerCharacter()+" Health: "+tank.getTankHealth());
             tank.checkTankFalling(this);
         }
     }
@@ -215,16 +180,11 @@ public class Projectile implements Coordinates {
             int start = 0;
             int end = 864;
 
-            //projectileEffectRadius
-            //if( ((int)xImpactPoint - craterRadius) > 0){
             if( ((int)xImpactPoint - projectileEffectRadius) > 0){
-                //start = (int)xImpactPoint - craterRadius;
                 start = (int)xImpactPoint - projectileEffectRadius;
             }
 
-            //if( ((int)xImpactPoint + craterRadius) < 864){
             if( ((int)xImpactPoint + projectileEffectRadius) < 864){
-                //end = (int)xImpactPoint + craterRadius;
                 end = (int)xImpactPoint + projectileEffectRadius;
             }
 
@@ -233,31 +193,19 @@ public class Projectile implements Coordinates {
                 int xDifference = i - (int)xImpactPoint;
 
                 //Blast radius ralative to yPosition or blast yPosition
-                //projectileEffectRadius
-                //float yValue = (float) Math.sqrt((craterRadius * craterRadius) - (xDifference * xDifference));
                 float yValue = (float) Math.sqrt((projectileEffectRadius * projectileEffectRadius) - (xDifference * xDifference));
-                //System.out.println("yValue: : "+yValue+ "yValue * 2: "+(int)(yValue * 2));
-                //System.out.println("Yvalue: "+yValue+" i value: "+i);
 
                 //If there is ground above blast. In this case decrease ground by yValue * 2 getTerrainHeight
-                //if((yImpactPoint - yValue ) >= terrain.terrainMovingAverageHeight[i]){
                 if((yImpactPoint - yValue ) >= terrain.getTerrainHeight(i)){
-                    //terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)(yValue) + (int)(yValue);
                     terrain.setTerrainHeight(i,terrain.getTerrainHeight(i) + (int)(yValue) + (int)(yValue));
-                    //System.out.println("The ground is above blast");
                 }
                 //If the ground is above mid blast but below top blast. Remove bottom blast radius and top blast radius
-                //else if(yImpactPoint > terrain.terrainMovingAverageHeight[i] && (this.getYPosition() - yValue ) < terrain.terrainMovingAverageHeight[i]){
                 else if(yImpactPoint > terrain.getTerrainHeight(i) && (this.getYPosition() - yValue ) < terrain.getTerrainHeight(i)){
-                    //terrain.terrainMovingAverageHeight[i] = terrain.terrainMovingAverageHeight[i] + (int)yValue + (int)(this.getYPosition() - terrain.terrainMovingAverageHeight[i]);
                     terrain.setTerrainHeight(i, (terrain.getTerrainHeight(i) + (int)yValue + (int)(this.getYPosition() - terrain.getTerrainHeight(i))));
-                    //System.out.println("The ground is between blast and mid blast");
                 }
                 //If ground is exact position as blast or below blast
-                //else if((yImpactPoint + yValue) >= terrain.terrainMovingAverageHeight[i]){
                 else if((yImpactPoint + yValue) >= terrain.getTerrainHeight(i)){
                     terrain.setTerrainHeight(i, ((int)terrain.getTerrainHeight(i) + (int)((yValue + this.getYPosition()) - terrain.getTerrainHeight(i))));
-                    //System.out.println("Ground is below mid blast");
                 }
             }  
 
@@ -270,11 +218,9 @@ public class Projectile implements Coordinates {
      * @param yImpactPoint The Y-axis impact point
      */
     public void projectileImpact(double xImpactPoint, double yImpactPoint){
-        //System.out.println("Projectile Impact");
         this.delete = true;
         Explosion projectileExplossion = new Explosion( (double)this.getXPosition(), (double)this.getYPosition(), (double)projectileEffectRadius );
         App.addExplosion(projectileExplossion);
-        
     }
 
     /**
@@ -283,14 +229,9 @@ public class Projectile implements Coordinates {
      */
     public boolean checkDirectHit(){
         for(Tank tank : App.getAliveTanks()){
-            //getTanksEdges(){
-            //XLeft, XRight, YTop
-            
+
+            //Check if its a direct Tanks projectile hit         
             if(tank.getTanksEdges()[0] < this.getXPosition() && tank.getTanksEdges()[1] > this.getXPosition() && tank.getYPosition() > this.getYPosition() && tank.getTanksEdges()[2] < this.getYPosition()){ 
-                System.out.println("Is Tanks Direct Hit. Direct hit Func Func Function");
-                System.out.println("Current projectile position: ("+this.getXPosition()+","+this.getYPosition()+")");
-                System.out.println("Current tank position: ("+tank.getXPosition()+","+tank.getYPosition()+")");
-                System.out.println("Tank edges: Left:"+tank.getTanksEdges()[0]+" Right: "+tank.getTanksEdges()[1]+" Top: "+tank.getTanksEdges()[2]+" Bottom: "+tank.getYPosition());
                 return true;
             }
         }   
@@ -302,37 +243,28 @@ public class Projectile implements Coordinates {
      */
     public void refresh(){
         //Check if projectile has gone beyond screen getTerrainHeight
-        //if(terrain.terrainMovingAverageHeight[(int)this.getXPosition()] <= (int)this.getYPosition()){
         if(terrain.getTerrainHeight((int)this.getXPosition()) <= (int)this.getYPosition()){
 
-            //this.setYPosition(terrain.terrainMovingAverageHeight[(int)getXPosition()]);
             this.setYPosition(terrain.getTerrainHeight((int)getXPosition()));
-          
-
+        
             projectileImpact(this.getXPosition(),this.getYPosition());
             deformTerrain(this.getXPosition(),this.getYPosition());
             calculateTankDamage((double)this.getXPosition(),(double)this.getYPosition());
-            //System.out.println("Projectile has hit the ground");
         //Projectile is still in screen
         }else{
             boolean directHit = checkDirectHit();
 
             if(directHit){
-                //System.out.println("Tank direct hit. Direct Hit function");
                 projectileImpact((double)this.getXPosition(),(double)this.getYPosition());
                 deformTerrain(this.getXPosition(),this.getYPosition());
                 calculateTankDamage((double)this.getXPosition(),(double)this.getYPosition());
             }
-
-
 
             //Effects of wind W * 0.03 pixels per second == (w * 0.03)
             this.setXPosition((this.getXPosition() + projectileXVelocity));
             this.setYPosition((this.getYPosition() - projectileYVelocity));
             projectileYVelocity = projectileYVelocity - PROJECTILEGRAVITY;
             projectileXVelocity = projectileXVelocity + ((terrain.getWindMagnitude() * 0.03)/30);
-    
-            //System.out.println("Projectile Y velocity: "+projectileYVelocity);
         }
     }
 
@@ -346,9 +278,6 @@ public class Projectile implements Coordinates {
         app.ellipse((float)this.getXPosition(), (float)this.getYPosition(), (float)projectileRadius,(float)-projectileRadius);
         app.stroke(0,0,0);
         app.noFill();
-        //System.out.println("Projectile pos: "+ xPosition + " ypos: "+yPosition);
-
-        
     }
     
 }

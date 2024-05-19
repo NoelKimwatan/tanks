@@ -44,8 +44,6 @@ public class Tree {
             randomisedTreePosition = App.WIDTH - treeDisplayDimensions;
         }
 
-        //System.out.println("Initial tree position: "+treeXPosition+" Randomised tree value: "+randomisedValue+" Final randomised value: "+randomisedTreePosition);
-
         return randomisedTreePosition;
     }
 
@@ -54,15 +52,9 @@ public class Tree {
      * @param app The App function object
      */
     public void draw(App app){
-        //System.out.println("You should see a tree");
-        //int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16] - 30);
         int treeheight = (t.getTerrainHeight((xPositionVal + 16)) - 30);
         int treeXPosition = xPositionVal;
         if(treeImage != null)app.image(treeImage,treeXPosition,treeheight, treeDisplayDimensions,treeDisplayDimensions);
-
-        // app.stroke(0,0,0);
-        // app.fill(0,0,0);
-        // app.rect(treeXPosition,treeheight, 31, 32);
     }
 
     /**
@@ -72,16 +64,8 @@ public class Tree {
      * @see Terrain#drawTerraingraphics 
      */
     public void draw(PGraphics app){
-        //int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16] - 30); getTerrainHeight
-        //int treeheight = (t.terrainMovingAverageHeight[xPositionVal + 16]-30);
         int treeheight = (t.getTerrainHeight((xPositionVal + 16)) -30);
         if(treeImage != null)app.image(treeImage,this.xPositionVal,treeheight, 32,32);
-
-        // app.stroke(0,0,0);
-        // app.fill(0,0,0);
-        // app.line(this.xPositionVal,treeheight,(this.xPositionVal),(treeheight-30));
-        // app.rect(treeXPosition,treeheight, 31, 32);
-
     }
 
     /**
